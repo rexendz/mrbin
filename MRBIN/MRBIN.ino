@@ -14,16 +14,22 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-const int trigX1 = 2;
-const int echoX1 = 3;
-const int trigX2 = 4;
-const int echoX2 = 5;
-const int trigY1 = 6;
-const int echoY1 = 7;
-const int trigY2 = 8;
-const int echoY2 = 9;
+const int sensor1Trig = 6;
+const int sensor1Echo = 7;
+
+const int sensor2Trig = 2;
+const int sensor2Echo = 3;
+
+const int sensor3Trig = 4;
+const int sensor3Echo = 5;
+
+const int sensor4Trig = 8;
+const int sensor4Echo = 9;
+
 
 double volArr[20];
+double samples[10];
+int sampleCount = 0;
 
 void setup() {
   lcd.init();
@@ -38,37 +44,59 @@ void setup() {
 void loop() {
   int count = 0;
   double aveVol = 0;
+  bool readSuccess = false;
   
-  while(objectDetected()){ // First checks if there is an object inside the container
-    if(count < 20){
-    do{
-      volArr[count++] = getVolume(); // Inserts the first 20 data into the array
-    }while(count < 20);
+  while(objectDetected() && count < 100){ // First checks if there is an object inside the container
+    if(count == 0){
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("     OBJECT     ");
+      lcd.setCursor(0, 1);
+      lcd.print("    DETECTED!   ");
     }
+    
+    while(count < 20)
+      volArr[count++] = getVolume(); // Inserts the first 20 data into the array
     
     else{
     for(int i = 0; i < 19; i++) // Shifts the data to the left to make room for the new data
       volArr[i] = volArr[i+1]; 
       
     volArr[19] = getVolume(); // Insert the latest data into the array
+    count++;
     }
+    
       aveVol = 0; // Resets aveVol for recalculation
+      
     for(int i = 0; i < 20; i++) // Adds all the data
       aveVol += volArr[i];
 
     aveVol /= 20; // Divide the sum by the total number of data to get the average
     
-    dispToLCD(aveVol); // Display the average volume
-    
-    delay(1);
+    if(count >= 89)
+      dispToLCD(aveVol); // Display the average volume
+    if(count == 99){
+      samples[sampleCount++] = aveVol;
+      readSuccess = true;
+    }
   }
   
+  if(sampleCount > 0){
+    for(int i = 0; i < 10; i++){
+      Serial.print("Reading ");
+      Serial.print(i+1);
+      Serial.print(samples[i]);
+      Serial.println("mL");
+    }
+  }
+  
+  if(readSuccess == false){
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("  CONTAINER IS  ");
-  lcd.setCursor(1, 0);
+  lcd.setCursor(0, 1);
   lcd.print("     EMPTY!     ");
-  
+  }
   delay(100);
 }
 
@@ -77,7 +105,8 @@ void dispToLCD(double volume){
   lcd.setCursor(0, 0);
   lcd.print("Volume: ");
   lcd.print(volume);
-  lcd.print(" mL");
+  lcd.print("mL");
+  delay(100);
 }
 
 bool objectDetected(){
@@ -117,17 +146,17 @@ double getDistance(int sensor){
   int trig, echo;
   double distance;
   switch (sensor){ // Selects which sensor will be active
-    case 1: trig = trigX1;
-            echo = echoX1;
+    case 1: trig = sensor1Trig;
+            echo = sensor1Echo;
             break;
-    case 2: trig = trigX2;
-            echo = echoX2;              
+    case 2: trig = sensor2Trig;
+            echo = sensor2Echo;              
             break;
-    case 3: trig = trigY1;
-            echo = echoY1;
+    case 3: trig = sensor3Trig;
+            echo = sensor3Echo;
             break;
-    case 4: trig = trigY2;
-            echo = echoY2;              
+    case 4: trig = sensor4Trig;
+            echo = sensor4Echo;              
             break;
     default: Serial.print("Error");
     }
