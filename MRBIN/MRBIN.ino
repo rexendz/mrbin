@@ -14,14 +14,16 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-const int sensor1Trig = 6;
-const int sensor1Echo = 7;
+bool debugSensors = false;
 
-const int sensor2Trig = 2;
-const int sensor2Echo = 3;
+const int sensor1Trig = 2;
+const int sensor1Echo = 3;
 
-const int sensor3Trig = 4;
-const int sensor3Echo = 5;
+const int sensor2Trig = 4;
+const int sensor2Echo = 5;
+
+const int sensor3Trig = 6;
+const int sensor3Echo = 7;
 
 const int sensor4Trig = 8;
 const int sensor4Echo = 9;
@@ -42,11 +44,32 @@ void setup() {
 }
 
 void loop() {
+  if(debugSensors == true){
+	Serial.print("Sensor 1: ");
+	Serial.print(getDistance(1));
+	Serial.println("cm");
+	
+	Serial.print("Sensor 2: ");
+	Serial.print(getDistance(2));
+	Serial.println("cm");
+	
+	Serial.print("Sensor 3: ");
+	Serial.print(getDistance(3));
+	Serial.println("cm");
+	
+	Serial.print("Sensor 4: ");
+	Serial.print(getDistance(4));
+	Serial.println("cm");
+	
+	delay(500);
+  }
+  
+  else{
   int count = 0;
   double aveVol = 0;
   bool readSuccess = false;
   
-  while(objectDetected() && count < 100){ // First checks if there is an object inside the container
+  while(objectDetected() && count < 500){ // First checks if there is an object inside the container
     if(count == 0){
       lcd.clear();
       lcd.setCursor(0, 0);
@@ -58,8 +81,8 @@ void loop() {
     while(count < 20)
       volArr[count++] = getVolume(); // Inserts the first 20 data into the array
     
-    else{
-    for(int i = 0; i < 19; i++) // Shifts the data to the left to make room for the new data
+    if(count >= 20){
+    for(int i = 0; i < 19; i++) // Shifts the data to the left to make room for the new datum
       volArr[i] = volArr[i+1]; 
       
     volArr[19] = getVolume(); // Insert the latest data into the array
@@ -73,9 +96,9 @@ void loop() {
 
     aveVol /= 20; // Divide the sum by the total number of data to get the average
     
-    if(count >= 89)
+    if(count >= 399)
       dispToLCD(aveVol); // Display the average volume
-    if(count == 99){
+    if(count == 499 && sampleCount < 10){
       samples[sampleCount++] = aveVol;
       readSuccess = true;
     }
@@ -98,6 +121,7 @@ void loop() {
   lcd.print("     EMPTY!     ");
   }
   delay(100);
+  }
 }
 
 void dispToLCD(double volume){
@@ -125,7 +149,7 @@ double getVolume(){
   double sensor2 = getDistance(2);
   double sensor3 = getDistance(3);
   double sensor4 = getDistance(4);
-  double d = totalLength - (((sensor1+sensor4)/2)+((sensor2+sensor3)/2));
+  double d = totalLength - (((sensor1+sensor2)/2)+((sensor3+sensor4)/2));
   double h = bottleHeight;
   double r = d/2;
   double vol = (3.14)*(r*r)*(h);
