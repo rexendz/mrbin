@@ -1,5 +1,4 @@
-/*  9/4/19 12:44AM
- *  CODE       FOR
+/*  CODE       FOR
  *  INITIAL DESIGN
  *  FOR THESIS  II
  *  BY: REX ENDOZO
@@ -38,7 +37,7 @@ void setup() {
   lcd.backlight();
   Serial.begin(9600);
   for(int i = 1; i <= 4; i++){
-    Serial.println(getDistance(i));
+    Serial.println(getDistance(i)); // Test ultarsonic sensors
   }
   delay(1000);
 }
@@ -101,6 +100,12 @@ void loop() {
     if(count == 499 && sampleCount < 10){
       samples[sampleCount++] = aveVol;
       readSuccess = true;
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("    READING     ");
+      lcd.setCursor(0, 1);
+      lcd.print("    SUCCESS!!   ");
+      delay(5000);
     }
   }
   
@@ -108,6 +113,7 @@ void loop() {
     for(int i = 0; i < 10; i++){
       Serial.print("Reading ");
       Serial.print(i+1);
+      Serial.print(": ");
       Serial.print(samples[i]);
       Serial.println("mL");
     }
