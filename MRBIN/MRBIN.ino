@@ -27,18 +27,26 @@ const int sensor3Echo = 7;
 const int sensor4Trig = 8;
 const int sensor4Echo = 9;
 
-const int buttonPin = 10;
+const int buttonPin1 = 10;
+const int buttonPin2 = 11;
 
-unsigned long timer = 0;
-int lastButtonReading = LOW;
-int buttonState = LOW;
+unsigned long timer1 = 0;
+unsigned long timer2 = 0;
+int lastButtonReading1 = LOW;
+int lastButtonReading2 = LOW;
+int buttonState1 = LOW;
+int buttonState2 = LOW;
+
+bool viewSamples = false;
 
 double volArr[20];
 double samples[10];
 int sampleCount = 0;
+int dispSample = 0;
 
 void setup() {
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin1, INPUT);
+  pinMode(buttonPin2, INPUT);
   lcd.init();
   lcd.backlight();
   Serial.begin(9600);
@@ -69,7 +77,6 @@ void loop() {
   }
   
   else{
-    int buttonReading = digitalRead(buttonPin); // Save button reading
     int count = 0; // Ultrasonic sensor reading count
     double aveVol = 0; // Average volume of the object
     bool startScan = false; // Indicates if scanning of object is initialized or not
@@ -82,13 +89,15 @@ void loop() {
       lcd.setCursor(0, 1);
       lcd.print("    DETECTED!   ");
       
-      if(buttonReading != lastButtonReading) // If the current button reading is different from the last button reading
-        timer = millis(); // Sets the timer to millis
+      int buttonReading1 = digitalRead(buttonPin1); // Save button reading
+      
+      if(buttonReading1 != lastButtonReading1) // If the current button reading is different from the last button reading
+        timer1 = millis(); // Sets the timer to millis
         
-      if((millis() - timer) > 50){ // If the time the button has been pressed exceeds 50 milliseconds
-        if(buttonReading != buttonState){ // If the state of the button is different from the reading of the button
-          buttonState = buttonReading; // Sets the state of the button as the current reading of the button
-          if(buttonReading == HIGH) // If the button is pressed down
+      if((millis() - timer1) > 50){ // If the time the button has been pressed exceeds 50 milliseconds
+        if(buttonReading1 != buttonState1){ // If the state of the button is different from the reading of the button
+          buttonState1 = buttonReading1; // Sets the state of the button as the current reading of the button
+          if(buttonReading1 == HIGH) // If the button is pressed down
             startScan = true; // Set startScan to TRUE
         }
       }
@@ -121,7 +130,7 @@ void loop() {
       if(count >= 399)
         dispToLCD(aveVol); // Display the average volume
         
-      if(count == 499 && sampleCount < 10){
+      if(count == 499){
         samples[sampleCount++] = aveVol;
         readSuccess = true;
         lcd.clear();
@@ -129,13 +138,34 @@ void loop() {
         lcd.print("    READING     ");
         lcd.setCursor(0, 1);
         lcd.print("    SUCCESS!!   ");
+        if(sampleCount > 9)
+          sampleCount = 0;
         delay(5000);
       }
     }
-    lastButtonReading = buttonReading;
+    lastButtonReading1 = buttonReading1;
   }
   
-  if(sampleCount > 0){
+  int buttonReading2 = digitalRead(buttonPin2);
+  if(buttonReading2 != lastButtonReading2)
+    timer2 = millis();
+      
+  if((millis() - timer2) > 50){
+    if(buttonState2 != buttonReading2){
+      buttonState2 = buttonReading2;
+      if(buttonState2 == HIGH){
+        if(viewSamples == false)
+          dispSample = 0;
+        else
+          dispSample++;
+         
+        viewSamples = true;
+        if(dispSample >= sampleCount)
+          viewSamples = false;
+      }
+    }
+  }
+    /*
     for(int i = 0; i < 10; i++){
       Serial.print("Reading ");
       Serial.print(i+1);
@@ -143,16 +173,39 @@ void loop() {
       Serial.print(samples[i]);
       Serial.println("mL");
     }
-  }
-  
-  if(readSuccess == false){
+    */
+    lastButtonReading2 = buttonReading2;
+
+  if(viewSamples = true){
+    if(sampleCount == 0){
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("  SAMPLES  ARE  ");
+      lcd.setCursor(0, 1);
+      lcd.print("     EMPTY!     ");
+      delay(1000);
+      viewSamples = false;
+    }
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("  CONTAINER IS  ");
+    lcd.print("    SAMPLE ");
+    lcd.print(dispSample+1);
+    lcd.print("    ");
     lcd.setCursor(0, 1);
-    lcd.print("     EMPTY!     ");
+    lcd.print("  ");
+    lcd.print(samples[dispSample++]);
+    lcd.print("mL");
   }
-  delay(100);
+  else{
+    if(readSuccess == false){
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("  CONTAINER IS  ");
+      lcd.setCursor(0, 1);
+      lcd.print("     EMPTY!     ");
+    }
+    delay(100);
+    }
   }
 }
 
