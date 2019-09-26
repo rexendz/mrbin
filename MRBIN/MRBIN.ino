@@ -27,86 +27,112 @@ const int sensor3Echo = 7;
 const int sensor4Trig = 8;
 const int sensor4Echo = 9;
 
+const int buttonPin = 10;
+
+unsigned long timer = 0;
+int lastButtonReading = LOW;
+int buttonState = LOW;
 
 double volArr[20];
 double samples[10];
 int sampleCount = 0;
 
 void setup() {
+  pinMode(buttonPin, INPUT);
   lcd.init();
   lcd.backlight();
   Serial.begin(9600);
-  for(int i = 1; i <= 4; i++){
-    Serial.println(getDistance(i)); // Test ultarsonic sensors
-  }
+  for(int i = 1; i <= 4; i++)
+    Serial.println(getDistance(i)); // Test ultrasonic sensors
   delay(1000);
 }
 
 void loop() {
   if(debugSensors == true){
-	Serial.print("Sensor 1: ");
-	Serial.print(getDistance(1));
-	Serial.println("cm");
-	
-	Serial.print("Sensor 2: ");
-	Serial.print(getDistance(2));
-	Serial.println("cm");
-	
-	Serial.print("Sensor 3: ");
-	Serial.print(getDistance(3));
-	Serial.println("cm");
-	
-	Serial.print("Sensor 4: ");
-	Serial.print(getDistance(4));
-	Serial.println("cm");
-	
-	delay(500);
+    Serial.print("Sensor 1: ");
+    Serial.print(getDistance(1));
+    Serial.println("cm");
+  
+   Serial.print("Sensor 2: ");
+   Serial.print(getDistance(2));
+   Serial.println("cm");
+  
+    Serial.print("Sensor 3: ");
+    Serial.print(getDistance(3));
+   Serial.println("cm");
+  
+    Serial.print("Sensor 4: ");
+    Serial.print(getDistance(4));
+    Serial.println("cm");
+    
+   delay(500);
   }
   
   else{
-  int count = 0;
-  double aveVol = 0;
-  bool readSuccess = false;
-  
-  while(objectDetected() && count < 500){ // First checks if there is an object inside the container
-    if(count == 0){
+    int buttonReading = digitalRead(buttonPin); // Save button reading
+    int count = 0; // Ultrasonic sensor reading count
+    double aveVol = 0; // Average volume of the object
+    bool startScan = false; // Indicates if scanning of object is initialized or not
+    bool readSuccess = false; // Indicates if scanning of object is successful or not
+    
+    while(objectDetected() && count < 500){ // First checks if there is an object inside the container
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("     OBJECT     ");
       lcd.setCursor(0, 1);
       lcd.print("    DETECTED!   ");
-    }
-    
-    while(count < 20)
-      volArr[count++] = getVolume(); // Inserts the first 20 data into the array
-    
-    if(count >= 20){
-    for(int i = 0; i < 19; i++) // Shifts the data to the left to make room for the new datum
-      volArr[i] = volArr[i+1]; 
       
-    volArr[19] = getVolume(); // Insert the latest data into the array
-    count++;
-    }
-    
-      aveVol = 0; // Resets aveVol for recalculation
+      if(buttonReading != lastButtonReading) // If the current button reading is different from the last button reading
+        timer = millis(); // Sets the timer to millis
+        
+      if((millis() - timer) > 50){ // If the time the button has been pressed exceeds 50 milliseconds
+        if(buttonReading != buttonState){ // If the state of the button is different from the reading of the button
+          buttonState = buttonReading; // Sets the state of the button as the current reading of the button
+          if(buttonReading == HIGH) // If the button is pressed down
+            startScan = true; // Set startScan to TRUE
+        }
+      }
+  
+      if(startScan == true){ // If the user pressed the button to scan
+        while(count < 20) //
+         volArr[count++] = getVolume(); // Inserts the first 20 data into the array
       
-    for(int i = 0; i < 20; i++) // Adds all the data
-      aveVol += volArr[i];
-
-    aveVol /= 20; // Divide the sum by the total number of data to get the average
-    
-    if(count >= 399)
-      dispToLCD(aveVol); // Display the average volume
-    if(count == 499 && sampleCount < 10){
-      samples[sampleCount++] = aveVol;
-      readSuccess = true;
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("    READING     ");
-      lcd.setCursor(0, 1);
-      lcd.print("    SUCCESS!!   ");
-      delay(5000);
+      if(count >= 20){
+        for(int i = 0; i < 19; i++) // Shifts the data to the left to make room for the new datum
+          volArr[i] = volArr[i+1]; 
+        
+          volArr[19] = getVolume(); // Insert the latest data into the array
+          count++;
+      }
+      
+        aveVol = 0; // Resets aveVol for recalculation
+        
+        for(int i = 0; i < 20; i++) // Adds all the data
+          aveVol += volArr[i];
+  
+      aveVol /= 20; // Divide the sum by the total number of data to get the average
+      if(count < 399){
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("    SCANNING    ");
+        lcd.setCursor(0, 1);
+        lcd.print("  PLEASE  WAIT  ");
+      }
+      if(count >= 399)
+        dispToLCD(aveVol); // Display the average volume
+        
+      if(count == 499 && sampleCount < 10){
+        samples[sampleCount++] = aveVol;
+        readSuccess = true;
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("    READING     ");
+        lcd.setCursor(0, 1);
+        lcd.print("    SUCCESS!!   ");
+        delay(5000);
+      }
     }
+    lastButtonReading = buttonReading;
   }
   
   if(sampleCount > 0){
@@ -120,11 +146,11 @@ void loop() {
   }
   
   if(readSuccess == false){
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("  CONTAINER IS  ");
-  lcd.setCursor(0, 1);
-  lcd.print("     EMPTY!     ");
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("  CONTAINER IS  ");
+    lcd.setCursor(0, 1);
+    lcd.print("     EMPTY!     ");
   }
   delay(100);
   }
