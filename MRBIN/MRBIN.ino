@@ -160,7 +160,7 @@ void loop() {
           dispSample++;
          
         viewSamples = true;
-        if(dispSample >= 10)
+        if(dispSample >= sampleCount)
           viewSamples = false;
       }
     }
