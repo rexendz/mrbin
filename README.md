@@ -1,4 +1,4 @@
 # Machine for Recycling Bottles with Incentive Noting
-                    (MR BIN)
+#                    (MR BIN)
 
-MR BIN is our thesis project for our senior year in ADZU. It is a smart trash bin that can detect PET bottles and measure its volume, while rejecting other materials that are not PET bottles. After the device successfully scans the PET bottle, it will then compress the PET bottle and store it inside the bin. When a user successfully transacts using our device, it will give out incentives to that user (Incentive Noting)
+MR BIN is our thesis project for our senior year in ADZU. It is a smart trash bin that can detect PET bottles and measure its volume, while rejecting other materials that are not PET bottles. After the device successfully scans the PET bottle, it will then compress the PET bottle and store it inside the bin. When a user successfully transacts using our device, it will give out incentives to that user (Incentive Noting). There are three modules in this device, the Plastic Detection Module, Volume Measurement Module and the PET Bottle Storage Module.
