@@ -43,9 +43,9 @@ void setup(){
 }
 
 void loop(){
-  scanObject();
+  scanObject(); // Method to get the volume and save it
   
-  lcd.clear();
+  lcd.clear(); // Print these if there is no object inside the container
   lcd.setCursor(0, 0);
   lcd.print("  CONTAINER IS  ");
   lcd.setCursor(0, 1);
@@ -66,7 +66,7 @@ void mapDimensions(){
     }while(dist3 <= 40 && dist3 > 38);
     do{
       dist4 = getDistance(4);
-    }while(dist4 < 40 && dist4 > 38);
+    }while(dist4 <= 40 && dist4 > 38);
   }
   dist1/=10;
   dist2/=10;
