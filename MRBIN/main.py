@@ -12,30 +12,30 @@ if __name__ == "__main__":
     print("Done!")
     processor = processing()
     while True:
+        distance = reader.read()
+        if distance <= 10 and distance > 2:
+            if not object_detected:
+                print("Object Detected!")
+                print("Distance from sensor: ", reader.read())
+                object_detected = True
+            
+        elif distance > 10:
+            object_detected = False
+
         if not object_detected:
             print("Object is not detected!")
-
-		if reader.read() <= 10 and reader.read() > 2: # Checks if object is in range
-			if not object_detected: # Only runs if object_detected is not yet triggered
-				print("Object Detected!")
-				print("Distance from sensor: ", reader.read())
-				object_detected = True
-
-		elif reader.read() > 10:
-			object_detected = False
-
-        if object_detected:
-            if not window_started:
-                k = processor.display_proc(window=1, window_started=window_started)
-                window_started = True
+            processor.rest()
+            
+        elif object_detected:
+            # window=0 --- Raw Image from Camera
+            # window=1 --- Image w/ Detection 
+            # window=2 --- Edge Mask
+            # window=3 --- Image w/ Detection & Edge Mask
+            # window=4 --- Image w/ Detection & Edge Mask & Trackbars
+            k = processor.display_proc(window=1) 
             
             if k == 27:
                 break
-        
-        
-        if not object_detected:
-            processor.rest()
-    
     
     reader.stop()
     processor.release()
