@@ -44,6 +44,9 @@ class mrbin:
 	
 	def pause(self):
 		self.paused = True
+
+	def resume(self):
+		self.paused = False
 		
 	def getRes(self):
 		return self.resolution
@@ -76,8 +79,8 @@ if __name__ == "__main__":
 		if not object_detected:
 			print("Object is not detected!")		
 		
-		if reader.read() <= 10 and reader.read() > 2:
-			if not object_detected:
+		if reader.read() <= 10 and reader.read() > 2: # Checks if object is in range
+			if not object_detected: # Only runs if object_detected is not yet triggered
 				print("Object Detected!")
 				print("Distance from sensor: ", reader.read())
 				object_detected = True
@@ -88,6 +91,9 @@ if __name__ == "__main__":
 			if cam_started == False:	
 				cam = mrbin().start()
 				cam_started = True
+
+			cam.resume()
+			
 			if window_started == False:
 				cv2.namedWindow('Image')
 				cv2.namedWindow('Edged')
@@ -166,6 +172,3 @@ if __name__ == "__main__":
 	cam.stop()
 	cv2.destroyAllWindows()
 	cam_destroy == False
-
-	
-	
