@@ -9,6 +9,7 @@ class SerialListener:
 		except:
 			self.ser = Serial('/dev/ttyACM0', baudrate, timeout=timeout)
 		self.stopped = False
+		self.paused = False
 		self.stream = ''
 		print("Serial port initialized, waiting 3 seconds...")
 		time.sleep(3) # Wait for serial buffer to reset
@@ -18,7 +19,7 @@ class SerialListener:
 		return self
 	
 	def update(self):
-		if not self.stopped:
+		if not self.paused:
 			while True:
 				if self.stopped:
 					self.ser.close()
@@ -30,10 +31,12 @@ class SerialListener:
 					self.stream = self.ser.readline().decode('ascii')
 				self.stream = self.stream.rstrip()
 				
-			print("Serial closed!")
 	def stop(self):
 		self.stopped = True
 		print("Thread stopped!")
+	
+	def pause(self):
+		self.paused = True
 		
 	def read(self):
 		try:
