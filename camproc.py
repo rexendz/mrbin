@@ -71,8 +71,9 @@ class processing:
             box = cv2.minAreaRect(c)
             box = cv2.boxPoints(box)
             box = np.array(box, dtype="int")
-
             box = perspective.order_points(box)
+
+            img = orig.copy() # To remove contours from the previous frame
 
             cv2.drawContours(img, [box.astype("int")], -1, (0, 255, 0), 2)
             for (x, y) in box:
@@ -84,13 +85,13 @@ class processing:
             (tlblX, tlblY) = self.midpoint(tl, bl)
             (trbrX, trbrY) = self.midpoint(tr, br)
             
-            cv2.circle(orig, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
-            cv2.circle(orig, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
-            cv2.circle(orig, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
-            cv2.circle(orig, (int(trbrX), int(trbrY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(trbrX), int(trbrY)), 2, (255, 0, 0), -1)
             
-            cv2.line(orig, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)), (100, 0, 100), 1)
-            cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)), (100, 0, 100), 1)
+            cv2.line(img, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)), (100, 0, 100), 1)
+            cv2.line(img, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)), (100, 0, 100), 1)
             
             dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
             dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))

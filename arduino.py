@@ -1,3 +1,5 @@
+# Reads data from the serial monitor without interrupting the main thread
+
 from serial import Serial
 import time
 from threading import Thread
@@ -42,7 +44,7 @@ class SerialListener:
         try:
             return float(self.stream)
         except:
-            return -1   # Return -1 if there is an error in reading
+            return -1   # Returns -1 if there is an error in reading
 
 if __name__ == "__main__": # FOR DEBUGGING ONLY
     reader = SerialListener().start()
