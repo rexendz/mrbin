@@ -2,6 +2,7 @@ from picamera import PiCamera
 from picamera.array import PiRGBArray
 from threading import Thread
 
+
 class camera:
     def __init__(self, resolution=(320,240), framerate=32):
         self.cam = PiCamera()

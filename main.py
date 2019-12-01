@@ -1,26 +1,36 @@
 from camproc import processing
-from arduino import SerialListener
+try:
+    from arduino import SerialListener
+except ImportError or ImportError:
+    print ("Warning: No Arduino connected")
+
 
 object_detected = False
 window_started = False
 
 if __name__ == "__main__":
-    reader = SerialListener().start()
-    while (reader.read()) == -1:
-        pass
+    try:
+        reader = SerialListener().start()
+        while (reader.read()) == -1:
+            pass
+    except NameError:
+        print ("Warning: No Arduino")
 
     print("Done!")
-    processor = processing()
+    processor = processing(device="__IP__")
     while True:
-        distance = reader.read()
-        if distance <= 10 and distance > 2:
-            if not object_detected:
-                print("Object Detected!")
-                print("Distance from sensor: ", reader.read())
-                object_detected = True
+        try:
+            distance = reader.read()
+            if distance <= 10 and distance > 2:
+                if not object_detected:
+                    print("Object Detected!")
+                    print("Distance from sensor: ", reader.read())
+                    object_detected = True
             
-        elif distance > 10:
-            object_detected = False
+            elif distance > 10:
+                object_detected = False
+        except NameError:
+            object_detected = True  # IF there is no Arduino, always show image
 
         if not object_detected:
             print("Object is not detected!")
@@ -32,16 +42,12 @@ if __name__ == "__main__":
             # window=2 --- Edge Mask
             # window=3 --- Image w/ Detection & Edge Mask
             # window=4 --- Image w/ Detection & Edge Mask & Trackbars
-            k = processor.display_proc(window=1) 
+            k = processor.display_proc(window=4)
             
             if k == 27:
                 break
-    
-    reader.stop()
+    try:
+        reader.stop()
+    except NameError:
+        print("Warning: No Arduino")
     processor.release()
-
-
-
-
-
-    
