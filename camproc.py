@@ -14,6 +14,7 @@ class processing:
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
     def __init__(self, device="__IP__", url="http://192.168.1.2:8080/video", ppm=10):
         self.device = device
+        print(self.device)
         if self.device == "__IP__":
             self.cam = cv2.VideoCapture(url)
         else:
@@ -25,7 +26,7 @@ class processing:
         self.window_started = False
 
     # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED, 3 - IMAGE&EDGED, 4 - IMAGE&EDGED w/ TRACKS
-    def display_proc(self, window=1, cannyLTH=0, cannyUTH=60, minarea=500, device="PI"):
+    def display_proc(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1500, device="PI"):
         def midpoint(ptA, ptB):
             return (ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5
 
@@ -48,7 +49,7 @@ class processing:
                 cv2.createTrackbar('uth', 'Tracks', 60, 200, ignore)
                 cv2.createTrackbar('area', 'Tracks', 1500, 10000, ignore)
             self.window_started = True
-
+        
         if self.device == "__PI__":
             if not self.cam_started:
                 self.cam = camera().start()
@@ -56,9 +57,9 @@ class processing:
                 time.sleep(1)
                 print("Pi Camera Started!")
                 self.cam_started = True
-                img = self.cam.read()
-                img = imutils.resize(img, width=400)
-
+        
+            img = self.cam.read()
+            
         elif self.device == "__IP__":
             ret, img = self.cam.read()
 
@@ -78,7 +79,6 @@ class processing:
             (cnts, _) = contours.sort_contours(cnts)
 
             for c in cnts:
-                print(len(cnts))
                 if window == 4:
                     if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks'):
                         continue
@@ -90,7 +90,7 @@ class processing:
                 box = cv2.boxPoints(box)
                 box = np.array(box, dtype="int")
                 box = perspective.order_points(box)
-
+                
                 cv2.drawContours(img, [box.astype("int")], -1, (0, 255, 0), 2)
                 for (x, y) in box:
                     cv2.circle(img, (int(x), int(y)), 2, (0, 0, 255), -1)

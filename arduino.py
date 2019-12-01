@@ -8,7 +8,7 @@ class SerialListener:
     def __init__(self, baudrate=9600, timeout=1):
         try:
             self.ser = Serial('/dev/ttyACM0', baudrate, timeout=timeout)
-        except:
+        except SerialException:
             self.ser = Serial('/dev/ttyACM1', baudrate, timeout=timeout)
             
         self.stopped = False

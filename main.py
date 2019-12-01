@@ -1,14 +1,27 @@
 from camproc import processing
+import argparse
 try:
     from arduino import SerialListener
-except ImportError or ImportError:
+except ImportError or SerialException:
     print ("Warning: No Arduino connected")
 
-
-object_detected = False
-window_started = False
-
 if __name__ == "__main__":
+    object_detected = False
+    window_started = False
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--ip", help="Select IP Camera with URL Instead Of PI Camera")
+    parser.add_argument("-w", "--window", help="Select Window To Display[0-4]", type=int)
+    
+    args = parser.parse_args()
+    
+    device = "__PI__"
+    url = "0.0.0.0"
+    
+    if args.ip is not None:
+        device = "__IP__"
+        url = args.ip
+    
     try:
         reader = SerialListener().start()
         while (reader.read()) == -1:
@@ -17,7 +30,7 @@ if __name__ == "__main__":
         print ("Warning: No Arduino")
 
     print("Done!")
-    processor = processing(device="__IP__")
+    processor = processing(device=device, url=url)
     while True:
         try:
             distance = reader.read()
@@ -42,7 +55,7 @@ if __name__ == "__main__":
             # window=2 --- Edge Mask
             # window=3 --- Image w/ Detection & Edge Mask
             # window=4 --- Image w/ Detection & Edge Mask & Trackbars
-            k = processor.display_proc(window=4)
+            k = processor.display_proc(window=args.window)
             
             if k == 27:
                 break
