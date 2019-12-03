@@ -8,7 +8,7 @@ class SerialListener:
     def __init__(self, baudrate=9600, timeout=1):
         try:
             self.ser = Serial('/dev/ttyACM0', baudrate, timeout=timeout)
-        except SerialException:
+        except:
             self.ser = Serial('/dev/ttyACM1', baudrate, timeout=timeout)
             
         self.stopped = False
@@ -39,18 +39,38 @@ class SerialListener:
     
     def pause(self):
         self.paused = True
+
+    def flush(self):
+        self.ser.flush()
         
-    def read(self):
+    def readDistance(self):
         try:
             return float(self.stream)
         except:
             return -1   # Returns -1 if there is an error in reading
 
+    def readRFID(self):
+        return self.stream
+
+    def write(self, msg):
+        self.ser.write(msg.encode())
+
 if __name__ == "__main__": # FOR DEBUGGING ONLY
-    reader = SerialListener().start()
+    uno = SerialListener().start()
+    uno.flush()
+    print("Serial Started")
+    uid = ''
     while True:
-        key = input("Enter to read/q to exit: ")
-        if key == 'q':
-            reader.stop()
-            break
-        print(reader.read())
+        uid = uno.readRFID()
+        if uid is not '':
+            uno.flush()
+            time.sleep(0.1)
+            if uid == "5BEE9F0D":
+                uno.write('O')
+                print("SHOULD BE GREEN")
+            else:
+                uno.write('X')
+                print("SHOULD BE RED")
+            print(uid)
+
+    uno.stop()
