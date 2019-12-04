@@ -67,7 +67,8 @@ class processing:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (7, 7), 0)
         if window == 4:
-            edged = cv2.Canny(gray, cv2.getTrackbarPos('lth', 'Tracks'), cv2.getTrackbarPos('uth', 'Tracks'))
+            if self.window_started:
+                edged = cv2.Canny(gray, cv2.getTrackbarPos('lth', 'Tracks'), cv2.getTrackbarPos('uth', 'Tracks'))
         else:
             edged = cv2.Canny(gray, cannyLTH, cannyUTH)
         edged = cv2.dilate(edged, None, iterations=1)
@@ -80,8 +81,9 @@ class processing:
 
             for c in cnts:
                 if window == 4:
-                    if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks'):
-                        continue
+                    if self.window_started:
+                        if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks'):
+                            continue
                 else:
                     if cv2.contourArea(c) < minarea:
                         continue
@@ -148,8 +150,8 @@ class processing:
         if self.device == "__PI__":
             if self.cam_started:
                 self.cam.pause()
-            self.window_started = False
 
+        self.window_started = False
         cv2.destroyAllWindows()
 
 
