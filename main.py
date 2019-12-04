@@ -1,10 +1,11 @@
 from camproc import processing
 from sql import SQLServer
+from serial import serialutil
 import time
 import argparse
 try:
     from arduino import SerialListener
-except ImportError or ImportError:
+except ImportError or serialutil.SerialException:
     print("Warning: No Arduino connected")
 
 if __name__ == "__main__":
@@ -61,7 +62,7 @@ if __name__ == "__main__":
             time.sleep(1)
 
         sql.close()
-    except NameError:
+    except serialutil.SerialException:
         print("Warning: No Arduino")
 
     processor = processing(device=device, url=url)
@@ -89,7 +90,7 @@ if __name__ == "__main__":
             # window=1 --- Image w/ Detection
             # window=2 --- Edge Mask
             # window=3 --- Image w/ Detection & Edge Mask
-            # window=4 --- Image w/ Detection & Edge Mask & Trackbars
+            # window=4 --- Image w/ Detection & Edge Mask & trackbars
             k = processor.display_proc(window=window)
             
             if k == 27:

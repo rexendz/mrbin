@@ -18,7 +18,7 @@ class processing:
         if self.device == "__IP__":
             self.cam = cv2.VideoCapture(url)
         else:
-            self.cam = None
+            self.cam = np.zeros([320, 240, 3], np.uint8)
         self.ppm = ppm
         self.diameter = 0
         self.height = 0
@@ -68,13 +68,13 @@ class processing:
         gray = cv2.GaussianBlur(gray, (7, 7), 0)
         if window == 4:
             if self.window_started:
-                edged = cv2.Canny(gray, cv2.getTrackbarPos('lth', 'Tracks'), cv2.getTrackbarPos('uth', 'Tracks'))
+                edged = cv2.Canny(gray.copy(), cv2.getTrackbarPos('lth', 'Tracks'), cv2.getTrackbarPos('uth', 'Tracks'))
         else:
-            edged = cv2.Canny(gray, cannyLTH, cannyUTH)
+            edged = cv2.Canny(gray.copy(), cannyLTH, cannyUTH)
         edged = cv2.dilate(edged, None, iterations=1)
         edged = cv2.erode(edged, None, iterations=1)
 
-        cnts = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
         if len(cnts) > 1:
             (cnts, _) = contours.sort_contours(cnts)
