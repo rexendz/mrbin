@@ -90,7 +90,7 @@ if __name__ == "__main__":
             # window=1 --- Image w/ Detection
             # window=2 --- Edge Mask
             # window=3 --- Image w/ Detection & Edge Mask
-            # window=4 --- Image w/ Detection & Edge Mask & Trackbars
+            # window=4 --- Image w/ Detection & Edge Mask & trackbars
             k = processor.display_proc(window=window)
             
             if k == 27:
