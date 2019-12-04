@@ -47,7 +47,7 @@ class processing:
                 cv2.namedWindow('Tracks')
                 cv2.createTrackbar('lth', 'Tracks', 0, 200, ignore)
                 cv2.createTrackbar('uth', 'Tracks', 60, 200, ignore)
-                cv2.createTrackbar('area', 'Tracks', 1500, 10000, ignore)
+                cv2.createTrackbar('area', 'Tracks', 1000, 5000, ignore)
             self.window_started = True
         
         if self.device == "__PI__":
@@ -82,7 +82,7 @@ class processing:
             for c in cnts:
                 if window == 4:
                     if self.window_started:
-                        if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks'):
+                        if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks') or cv2.contourArea(c) > 5000:
                             continue
                 else:
                     if cv2.contourArea(c) < minarea:
@@ -92,11 +92,13 @@ class processing:
                 box = cv2.boxPoints(box)
                 box = np.array(box, dtype="int")
                 box = perspective.order_points(box)
-                orig = img.copy()
+
+                if self.device == "__PI__":
+                    img = orig.copy() # Only render box to single object to save memory
                 
-                cv2.drawContours(orig, [box.astype("int")], -1, (0, 255, 0), 2)
+                cv2.drawContours(img, [box.astype("int")], -1, (0, 255, 0), 2)
                 for (x, y) in box:
-                    cv2.circle(orig, (int(x), int(y)), 2, (0, 0, 255), -1)
+                    cv2.circle(img, (int(x), int(y)), 2, (0, 0, 255), -1)
 
                 (tl, tr, br, bl) = box
                 (tltrX, tltrY) = midpoint(tl, tr)
@@ -104,13 +106,13 @@ class processing:
                 (tlblX, tlblY) = midpoint(tl, bl)
                 (trbrX, trbrY) = midpoint(tr, br)
             
-                cv2.circle(orig, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
-                cv2.circle(orig, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
-                cv2.circle(orig, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
-                cv2.circle(orig, (int(trbrX), int(trbrY)), 2, (255, 0, 0), -1)
+                cv2.circle(img, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
+                cv2.circle(img, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
+                cv2.circle(img, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
+                cv2.circle(img, (int(trbrX), int(trbrY)), 2, (255, 0, 0), -1)
             
-                cv2.line(orig, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)), (100, 0, 100), 1)
-                cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)), (100, 0, 100), 1)
+                cv2.line(img, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)), (100, 0, 100), 1)
+                cv2.line(img, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)), (100, 0, 100), 1)
             
                 dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
                 dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
@@ -120,17 +122,17 @@ class processing:
                     self.diameter = dimA
                     self.height = dimB
 
-                cv2.putText(orig, "{:.1f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
-                cv2.putText(orig, "{:.1f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+                cv2.putText(img, "{:.1f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+                cv2.putText(img, "{:.1f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
 
         if window == 0:
-            cv2.imshow('Image', img)
-        elif window == 1:
             cv2.imshow('Image', orig)
+        elif window == 1:
+            cv2.imshow('Image', img)
         elif window == 2:
             cv2.imshow('Edged', edged)
         elif window == 3 or window == 4:
-            cv2.imshow('Image', orig)
+            cv2.imshow('Image', img)
             cv2.imshow('Edged', edged)
         
         return cv2.waitKey(1) & 0xFF
