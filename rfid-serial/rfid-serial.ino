@@ -38,8 +38,9 @@ void loop() {
           Serial.println();
           readStatus = true;
           timer = millis();
+          delay(100);
         }
-        Serial.flush();
+        
       }
     }
   }
@@ -47,12 +48,11 @@ void loop() {
   if(readStatus){
     while(!Serial.available());
   
-    char rx = 'X';
+    char rx;
   
-    while(Serial.available()){
+    while(Serial.available())
       rx = Serial.read();
-    }
-
+    
     if(rx == 'O'){
     digitalWrite(GREEN_LED, HIGH);
     digitalWrite(RED_LED, LOW);
