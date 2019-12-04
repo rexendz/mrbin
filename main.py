@@ -26,52 +26,53 @@ if __name__ == "__main__":
     if args.window is not None:
         window = args.window
 
+    userAuthenticated = False
+
     try:
         reader = SerialListener().start()
-    except NameError:
-        print("Warning: No Arduino")
-
-    print("Please scan your ID")
-
-    sql = SQLServer()
-
-    reader.flush()
-    userAuthenticated = False
-    name = None
-    pts = None
-    while not userAuthenticated:
-        uid = ''
-        while uid is '':
-            uid = reader.readRFID()
-        time.sleep(0.1)
-        user = sql.findUid(int(uid, 16))
-        if len(user) > 0:
-            (_, name, _, pts), = user
-            print("Welcome, " + name)
-            print("Current Incentives: " + str(pts))
-            reader.write('O')
-            userAuthenticated = True
-        else:
-            reader.write('X')
-            print("There is no record of UID: " + uid + " in our database")
-            cr = input("Would you like to create a new one? (Y/N): ")
-            if cr == 'Y' or cr == 'y':
-                name = input("Enter your name: ")
-                sql.insert(name, int(uid, 16), 0)
-            print("Please scan your ID again")
+        reader.flush()
+        sql = SQLServer()
         time.sleep(1)
 
-    sql.close()
+        print("Please scan your ID")
+
+        name = None
+        pts = None
+        while not userAuthenticated:
+            uid = ''
+            while uid is '':
+                uid = reader.readRFID()
+            time.sleep(0.1)
+            user = sql.findUid(int(uid, 16))
+            if len(user) > 0:
+                (_, name, _, pts), = user
+                print("Welcome, " + name)
+                print("Current Incentives: " + str(pts))
+                reader.write('O')
+                userAuthenticated = True
+            else:
+                reader.write('X')
+                print("There is no record of UID: " + uid + " in our database")
+                cr = input("Would you like to create a new one? (Y/N): ")
+                if cr == 'Y' or cr == 'y':
+                    name = input("Enter your name: ")
+                    sql.insert(name, int(uid, 16), 0)
+                print("Please scan your ID again")
+            time.sleep(1)
+
+        sql.close()
+    except NameError:
+        print("Warning: No Arduino")
 
     processor = processing(device=device, url=url)
 
     while True:
         try:
             distance = reader.readDistance()
-            if 10 >= distance > 2:
+            if 18 >= distance > 2:
                 if not object_detected:
-                    print("Object Detected!")
-                    print("Distance from sensor: ", reader.readDistance())
+                    # print("Object Detected!")
+                    # print("Distance from sensor: ", reader.readDistance())
                     object_detected = True
             
             elif distance > 10:
