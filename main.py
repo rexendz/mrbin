@@ -31,7 +31,7 @@ if __name__ == "__main__":
     except NameError:
         print("Warning: No Arduino")
 
-    print("Done!")
+    print("Please scan your ID")
 
     sql = SQLServer()
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     while True:
         try:
             distance = reader.readDistance()
-            if distance <= 10 and distance > 2:
+            if 10 >= distance > 2:
                 if not object_detected:
                     print("Object Detected!")
                     print("Distance from sensor: ", reader.readDistance())
@@ -80,7 +80,7 @@ if __name__ == "__main__":
             object_detected = True  # IF there is no Arduino, always show image
 
         if not object_detected:
-            print("Object is not detected!")
+            # print("Object is not detected!")
             processor.rest()
             
         elif object_detected:
