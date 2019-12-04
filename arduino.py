@@ -71,27 +71,27 @@ if __name__ == "__main__":  # FOR DEBUGGING ONLY
     uno.flush()
     name = None
     pts = None
-
-    while True:
-        uid = ''
-        while uid is '':
-            uid = uno.readRFID()
-        time.sleep(0.1)
-        user = sql.findUid(int(uid, 16))
-        if len(user) > 0:
-            (_, name, _, pts), = user
-            print("Welcome, " + name)
-            print("Current Incentives: " + str(pts))
-            uno.write('O')
-        else:
-            uno.write('X')
-            print("There is no record of UID: " + uid + " in our database")
-            cr = input("Would you like to create a new one? (Y/N): ")
-            if cr == 'Y' or cr == 'y':
-                name = input("Enter your name: ")
-                print(sql.insert(name, int(uid, 16), 0), "record added")
-            print("Please scan your ID again")
-        print(uid)
-        time.sleep(1)
-
-    uno.stop()
+    try:
+        while True:
+            uid = ''
+            while uid is '':
+                uid = uno.readRFID()
+            time.sleep(0.1)
+            user = sql.findUid(int(uid, 16))
+            if len(user) > 0:
+                (_, name, _, pts), = user
+                print("Welcome, " + name)
+                print("Current Incentives: " + str(pts))
+                uno.write('O')
+            else:
+                uno.write('X')
+                print("There is no record of UID: " + uid + " in our database")
+                cr = input("Would you like to create a new one? (Y/N): ")
+                if cr == 'Y' or cr == 'y':
+                    name = input("Enter your name: ")
+                    sql.insert(name, int(uid, 16), 0)
+                print("Please scan your ID again")
+            time.sleep(1)
+    except KeyboardInterrupt:
+        uno.stop()
+        sql.close()
