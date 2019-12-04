@@ -14,7 +14,7 @@ class processing:
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
     def __init__(self, device="__IP__", url="http://192.168.1.2:8080/video", ppm=10):
         self.device = device
-        print(self.device)
+        # print(self.device)
         if self.device == "__IP__":
             self.cam = cv2.VideoCapture(url)
         else:
