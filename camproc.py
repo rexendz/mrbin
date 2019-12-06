@@ -50,6 +50,8 @@ class processing:
                 cv2.createTrackbar('area', 'Tracks', 1000, 5000, ignore)
             self.window_started = True
         
+        img = np.zeros([320, 240, 3], np.uint8)
+        
         if self.device == "__PI__":
             if not self.cam_started:
                 self.cam = camera().start()
