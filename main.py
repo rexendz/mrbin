@@ -9,6 +9,7 @@ except ImportError or serialutil.SerialException:
     print("Warning: No Arduino connected")
 
 if __name__ == "__main__":
+    print("Initializing, please wait...")
     object_detected = False
     
     parser = argparse.ArgumentParser()
