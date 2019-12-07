@@ -1,0 +1,3 @@
+#!/bin/bash
+python3 /home/pi/mrbin/MRBIN_GUI/HomeGUI.py
+
