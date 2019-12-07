@@ -46,9 +46,9 @@ class About(QDialog):
         self.title = "MR BIN"
         self.top = 0
         self.left = 0
-        self.width = 320
-        self.height = 240
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.width = 480
+        self.height = 320
+        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
         self.InitWindow()
@@ -60,7 +60,7 @@ class About(QDialog):
         self.setWindowIcon(self.icon)
         self.setStyleSheet("background-color: #212121;")
         self.setWindowFlags(Qt.FramelessWindowHint)
-
+        self.showFullScreen()
         self.setLayout(self.vbox)
 
     def InitComponents(self):

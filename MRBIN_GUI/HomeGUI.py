@@ -13,9 +13,9 @@ class Window(QWidget):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.width = 480
+        self.height = 320
+        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
         self.InitWindow()
@@ -36,7 +36,8 @@ class Window(QWidget):
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
-
+        self.showFullScreen()
+        
     def InitComponents(self):
         lbl1 = QLabel("Welcome to MR BIN", self)
         lbl1.setStyleSheet("font : 30px; font-family : Sanserif;")
