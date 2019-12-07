@@ -30,9 +30,9 @@ class Login(QDialog):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.width = 480
+        self.height = 320
+        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.usr = None
         self.pwd = None
@@ -54,6 +54,7 @@ class Login(QDialog):
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
+        self.showFullScreen()
 
     def InitComponents(self):
         self.usr = customLineEdit("Username", self)
