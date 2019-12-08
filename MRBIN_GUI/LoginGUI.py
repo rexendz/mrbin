@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from AdminGUI import Admin
 import sys
 
 
@@ -87,10 +88,14 @@ class Login(QDialog):
         else:
             if str(self.usr.text()) == "admin" and str(self.pwd.text()) == "12345":
                 msg.information(self, "Login Success", "Login Successful!\nAdministator mode activated.")
+                self.hide()
+                admin = Admin()
+                if admin.exec():
+                    pass
+                self.close()
+
             else:
                 msg.warning(self, "Login Error", "Wrong credentials")
-
-        print(self.usr.text(), self.pwd.text())
 
     def btn2Action(self):
         self.close()
@@ -98,5 +103,5 @@ class Login(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Scan()
+    window = Login()
     app.exec()
