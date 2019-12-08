@@ -11,8 +11,8 @@ class Window(QWidget):
     def __init__(self):
         super().__init__()
         self.title = "MR BIN"
-        self.left = 523
-        self.top = 264
+        self.left = 0
+        self.top = 0
         self.width = 320
         self.height = 240
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
