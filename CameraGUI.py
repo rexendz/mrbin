@@ -7,7 +7,7 @@ import sys
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
 
-    def __init__(self, name, pts):
+    def __init__(self, device, url, name, pts):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0

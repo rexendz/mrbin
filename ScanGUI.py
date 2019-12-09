@@ -35,7 +35,6 @@ class Worker(QObject):
                     self.reader.write('O')
                     self.userAuthenticated = True
                     self.continue_run = False
-                    self.sql.close()
                     self.auth.emit(self.name, self.pts)
                 else:
                     self.reader.write('X')

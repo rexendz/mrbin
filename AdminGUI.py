@@ -157,7 +157,7 @@ class InsertRecords(QDialog):
         else:
             try:
                 self.sql.insert(str(self.txt1.text()), int(self.txt2.text(), 16), int(self.txt3.text()))
-                msg.information(self, "Success!", "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(), int(self.txt2.text(), 16), int(self.txt3.text())))
+                msg.information(self, "Success!", "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(), self.txt2.text(), self.txt3.text()))
             except OperationalError:
                 msg.warning(self, "Failed!", "Data Insertion Failed!\nNo Record Inserted")
         self.switch_back.emit(self)

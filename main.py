@@ -124,6 +124,7 @@ class Controller:
         self.scan = Scan()
         self.window.close()
         self.scan.switch_back.connect(self.show_window)
+        self.scan.switch_cam.connect(self.show_cam)
         self.scan.switch_register.connect(self.show_insert)
 
     def show_login(self):
@@ -137,8 +138,8 @@ class Controller:
         self.about.switch_back.connect(self.show_window)
         self.window.close()
 
-    def show_cam(self):
-        self.cam = Cam(self.device, self.url)
+    def show_cam(self, name, pts):
+        self.cam = Cam(self.device, self.url, name, pts)
         self.cam.switch_back.connect(self.show_window)
         self.scan.close()
 
