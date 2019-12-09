@@ -7,6 +7,8 @@ import sys
 
 
 class ViewRecords(QDialog):
+    switch_back = pyqtSignal(QDialog)
+
     def __init__(self, sql):
         super().__init__()
         self.title = "MR BIN"
@@ -70,10 +72,12 @@ class ViewRecords(QDialog):
         self.vbox.addWidget(btn1)
 
     def btn1Action(self):
-        self.close()
+        self.switch_back.emit(self)
 
 
 class InsertRecords(QDialog):
+    switch_back = pyqtSignal(QDialog)
+
     def __init__(self, sql):
         super().__init__()
         self.title = "MR BIN"
@@ -144,7 +148,7 @@ class InsertRecords(QDialog):
         gbox.addWidget(btn2, 3, 1)
 
     def btn1Action(self):
-        self.close()
+        self.switch_back.emit(self)
 
     def btn2Action(self):
         msg = QMessageBox()
@@ -153,12 +157,17 @@ class InsertRecords(QDialog):
         else:
             try:
                 self.sql.insert(str(self.txt1.text()), int(self.txt2.text(), 16), int(self.txt3.text()))
-                msg.information(self, "Success!", "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(), self.txt2.text(), self.txt3.text()))
+                msg.information(self, "Success!", "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(), int(self.txt2.text(), 16), int(self.txt3.text())))
             except OperationalError:
                 msg.warning(self, "Failed!", "Data Insertion Failed!\nNo Record Inserted")
+        self.switch_back.emit(self)
 
 
 class Admin(QDialog):
+    switch_back = pyqtSignal(QDialog)
+    switch_insert = pyqtSignal(SQLServer)
+    switch_view = pyqtSignal(SQLServer, str)
+
     def __init__(self):
         super().__init__()
         self.title = "MR BIN"
@@ -219,14 +228,10 @@ class Admin(QDialog):
         self.vbox.addWidget(btn5)
 
     def btn1Action(self):
-        view = ViewRecords(self.sql)
-        if view.exec():
-            pass
+        self.switch_view.emit(self.sql, None)
 
     def btn2Action(self):
-        insert = InsertRecords(self.sql)
-        if insert.exec():
-            pass
+        self.switch_insert.emit(self.sql)
 
     def btn3Action(self):
         pass
@@ -235,7 +240,7 @@ class Admin(QDialog):
         pass
 
     def btn5Action(self):
-        self.close()
+        self.switch_back.emit(self)
 
 
 if __name__ == "__main__":

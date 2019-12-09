@@ -1,12 +1,166 @@
 from camproc import processing
-from sql import SQLServer
 from serial import serialutil
-import time
 import argparse
+from AboutGUI import About
+from ScanGUI import Scan
+from LoginGUI import Login
+from CameraGUI import Cam
+from AdminGUI import *
+import sys
 try:
     from arduino import SerialListener
 except ImportError or serialutil.SerialException:
     print("Warning: No Arduino connected")
+
+
+class Window(QWidget):
+    switch_scan = pyqtSignal(QWidget)
+    switch_login = pyqtSignal()
+    switch_about = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.title = "MR BIN"
+        self.left = 0
+        self.top = 0
+        self.width = 320
+        self.height = 240
+        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.vbox = QVBoxLayout()
+
+        self.InitWindow()
+        self.InitComponents()
+
+        self.show()
+
+    def InitWindow(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setMaximumHeight(self.height)
+        self.setMaximumWidth(self.width)
+        self.setMinimumHeight(self.height)
+        self.setMinimumWidth(self.width)
+        self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
+        self.vbox.setSpacing(5)
+        self.setStyleSheet("background-color: #212121;")
+        self.setWindowIcon(self.icon)
+        self.setLayout(self.vbox)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+
+    def InitComponents(self):
+        lbl1 = QLabel("Welcome to MR BIN", self)
+        lbl1.setStyleSheet("font : 30px; font-family : Sanserif;")
+        lbl1.setAlignment(Qt.AlignHCenter)
+
+        btn1 = QPushButton("Start MR BIN", self)
+        btn2 = QPushButton("Instructions", self)
+        btn3 = QPushButton("Administrator Mode", self)
+        btn4 = QPushButton("About", self)
+        btn5 = QPushButton("Exit", self)
+
+        btn1.clicked.connect(self.btn1Action)
+        btn2.clicked.connect(self.btn2Action)
+        btn3.clicked.connect(self.btn3Action)
+        btn4.clicked.connect(self.btn4Action)
+        btn5.clicked.connect(self.btn5Action)
+
+        self.vbox.addWidget(lbl1)
+        self.vbox.addWidget(btn1)
+        self.vbox.addWidget(btn2)
+        self.vbox.addWidget(btn3)
+        self.vbox.addWidget(btn4)
+        self.vbox.addWidget(btn5)
+
+    def btn1Action(self):
+        self.switch_scan.emit(self)
+
+    def btn2Action(self):
+        msg = QMessageBox()
+        msg.information(self, "Instructions", """
+        How to use MR BIN:
+        1.) Hold your ID near the ID Scanner.
+        2.) If used for the first time, input your name.
+        3.) Place the plastic bottle into the enclosure.
+        4.) Wait for the device to finish processing the object.
+        5.) You will be credited with incentives.
+        
+        Note:
+        If you placed an object that is not a plastic bottle, you will be 
+        asked to remove it and you will not get any incentive points.
+        """)
+
+    def btn3Action(self):
+        self.switch_login.emit()
+
+    def btn4Action(self):
+        self.switch_about.emit()
+
+    def btn5Action(self):
+        sys.exit(self.close())
+
+
+class Controller:
+    def __init__(self, dev, ur):
+        self.device = dev
+        self.url = ur
+        self.window = None
+        self.scan = None
+        self.about = None
+        self.login = None
+        self.cam = None
+        self.admin = None
+        self.view = None
+        self.insert = None
+
+    def show_window(self, prev_window):
+        self.window = Window()
+        self.window.switch_scan.connect(self.show_scan)
+        self.window.switch_about.connect(self.show_about)
+        self.window.switch_login.connect(self.show_login)
+        if prev_window is not None:
+            prev_window.close()
+
+    def show_scan(self):
+        self.scan = Scan()
+        self.window.close()
+        self.scan.switch_back.connect(self.show_window)
+        self.scan.switch_register.connect(self.show_insert)
+
+    def show_login(self):
+        self.login = Login()
+        self.login.switch_back.connect(self.show_window)
+        self.login.switch_admin.connect(self.show_admin)
+        self.window.close()
+
+    def show_about(self):
+        self.about = About()
+        self.about.switch_back.connect(self.show_window)
+        self.window.close()
+
+    def show_cam(self):
+        self.cam = Cam(self.device, self.url)
+        self.cam.switch_back.connect(self.show_window)
+        self.scan.close()
+
+    def show_admin(self, prev_window=None):
+        self.admin = Admin()
+        self.admin.switch_back.connect(self.show_window)
+        self.admin.switch_view.connect(self.show_view)
+        self.admin.switch_insert.connect(self.show_insert)
+        self.login.close()
+        if prev_window is not None:
+            prev_window.close()
+
+    def show_view(self, sql):
+        self.view = ViewRecords(sql)
+        self.view.switch_back.connect(self.show_admin)
+        self.admin.close()
+
+    def show_insert(self, sql):
+        self.insert = InsertRecords(sql)
+        self.insert.switch_back.connect(self.show_admin)
+        self.admin.close()
+
 
 if __name__ == "__main__":
     print("Initializing, please wait...")
@@ -30,41 +184,10 @@ if __name__ == "__main__":
 
     userAuthenticated = False
 
-    try:
-        reader = SerialListener().start()
-        reader.flush()
-        sql = SQLServer()
-        time.sleep(1)
-
-        print("Please scan your ID")
-
-        name = None
-        pts = None
-        while not userAuthenticated:
-            uid = ''
-            while uid is '':
-                uid = reader.readRFID()
-            time.sleep(0.1)
-            user = sql.findUid(int(uid, 16))
-            if len(user) > 0:
-                (_, name, _, pts), = user
-                print("Welcome, " + name)
-                print("Current Incentives: " + str(pts))
-                reader.write('O')
-                userAuthenticated = True
-            else:
-                reader.write('X')
-                print("There is no record of UID: " + uid + " in our database")
-                cr = input("Would you like to create a new one? (Y/N): ")
-                if cr == 'Y' or cr == 'y':
-                    name = input("Enter your name: ")
-                    sql.insert(name, int(uid, 16), 0)
-                print("Please scan your ID again")
-            time.sleep(1)
-
-        sql.close()
-    except serialutil.SerialException:
-        print("Warning: No Arduino")
+    app = QApplication(sys.argv)
+    controller = Controller(device, url)
+    controller.show_window(None)
+    app.exec()
 
     processor = processing(device=device, url=url)
 
