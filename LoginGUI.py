@@ -26,6 +26,9 @@ class customLineEdit(QLineEdit):
 
 
 class Login(QDialog):
+    switch_back = pyqtSignal(QDialog)
+    switch_admin = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.title = "MR BIN"
@@ -88,17 +91,13 @@ class Login(QDialog):
         else:
             if str(self.usr.text()) == "admin" and str(self.pwd.text()) == "12345":
                 msg.information(self, "Login Success", "Login Successful!\nAdministator mode activated.")
-                self.hide()
-                admin = Admin()
-                if admin.exec():
-                    pass
-                self.close()
+                self.switch_admin.emit()
 
             else:
                 msg.warning(self, "Login Error", "Wrong credentials")
 
     def btn2Action(self):
-        self.close()
+        self.switch_back.emit(self)
 
 
 if __name__ == "__main__":

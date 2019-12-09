@@ -41,6 +41,8 @@ class AnimationLabel(QLabel):
 
 
 class About(QDialog):
+    switch_back = pyqtSignal(QDialog)
+
     def __init__(self):
         super().__init__()
         self.title = "MR BIN"
@@ -53,6 +55,8 @@ class About(QDialog):
 
         self.InitWindow()
         self.InitComponents()
+
+        self.show()
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
@@ -76,8 +80,14 @@ class About(QDialog):
         label1.hide()
         label2.hide()
 
+        btn1 = QPushButton("Go Back", self)
+
+        btn1.clicked.connect(self.btn1Action)
+
         self.vbox.addWidget(label1)
         self.vbox.addWidget(label2)
+        self.vbox.addWidget(btn1)
+        btn1.hide()
 
         label1.show()
         label1.startFadeIn()
@@ -87,8 +97,12 @@ class About(QDialog):
         QTimer.singleShot(6000, label2.show)
         QTimer.singleShot(6000, label2.startFadeIn)
         QTimer.singleShot(10000, label2.startFadeOut)
-        QTimer.singleShot(11000, label2.hide)
-        QTimer.singleShot(11000, self.close)
+        QTimer.singleShot(12000, label2.hide)
+        QTimer.singleShot(12000, btn1.show)
+
+    def btn1Action(self):
+        self.switch_back.emit(self)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

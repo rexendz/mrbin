@@ -35,6 +35,11 @@ class SQLServer:
         nextID = self.getLength() + 1
         self.query = "ALTER TABLE {} AUTO_INCREMENT = {}".format(table, nextID)
         self.execute()
+        self.query = """
+        SET @count = 0;
+        UPDATE {} SET {}.id = @count:= @count + 1;
+        """.format(table, table)
+        self.execute()
         self.commit()
 
     def delete(self, Where, WhereVal, table="Users"):
