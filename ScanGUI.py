@@ -4,7 +4,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from sql import SQLServer
 from AdminGUI import InsertRecords
-from pymysql import OperationalError
 
 
 class Register(InsertRecords):
@@ -33,12 +32,12 @@ class Worker(QObject):
         self.continue_run = True
         self.sql = SQLServer()
         self.reader = reader
-        self.reader.resume()
         self.name = None
         self.pts = None
 
     def do_work(self):
         while self.continue_run:  # give the loop a stoppable condition
+            self.reader.resume()
             uid = ''
             while uid is '' and self.continue_run:
                 uid = self.reader.readRFID()
@@ -60,7 +59,7 @@ class Worker(QObject):
             except ValueError:
                 print("No Result")
             QThread.sleep(1)
-        self.sql.close()
+        self.reader.pause()
         self.finished.emit()
 
     def stop(self):

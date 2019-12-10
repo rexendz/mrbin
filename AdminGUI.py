@@ -5,6 +5,7 @@ from sql import SQLServer
 from pymysql.err import OperationalError
 import sys
 
+
 class ViewRecords(QDialog):
     switch_back = pyqtSignal(QDialog)
 
@@ -18,6 +19,8 @@ class ViewRecords(QDialog):
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.sql = sql
+        self.lbl1 = None
+        self.table = None
         self.btn1 = None
         self.InitWindow()
         self.InitComponents()
@@ -41,36 +44,36 @@ class ViewRecords(QDialog):
 
         result = self.sql.readAll()
 
-        table = QTableWidget(self)
-        table.setRowCount(len(result))
-        table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(['ID', 'Name', 'RFID-UID', 'Incentives'])
-        table.verticalHeader().setVisible(False)
-        table.horizontalHeader().setStretchLastSection(True)
+        self.table = QTableWidget(self)
+        self.table.setRowCount(len(result))
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(['ID', 'Name', 'RFID-UID', 'Incentives'])
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setStretchLastSection(True)
 
         for i in range(len(result)):
             for j in range(4):
                 if j == 2:
-                    table.setItem(i, j, QTableWidgetItem("{:08X}".format(result[i][j])))
+                    self.table.setItem(i, j, QTableWidgetItem("{:08X}".format(result[i][j])))
                 else:
-                    table.setItem(i, j, QTableWidgetItem(str(result[i][j])))
+                    self.table.setItem(i, j, QTableWidgetItem(str(result[i][j])))
 
-        lbl1 = QLabel("MR BIN Users", self)
-        lbl1.setStyleSheet("font : 40px; font-family : Sanserif;")
-        lbl1.setAlignment(Qt.AlignHCenter)
+        self.lbl1 = QLabel("MR BIN Users", self)
+        self.lbl1.setStyleSheet("font : 40px; font-family : Sanserif;")
+        self.lbl1.setAlignment(Qt.AlignHCenter)
 
         self.btn1 = QPushButton(self)
         self.btn1.setText("Close")
         self.btn1.clicked.connect(self.btn1Action)
 
-        self.btn1.setStyleSheet("color : white; background-color : #d50000; font : 20px; font-family : Sanserif;")
+        self.btn1.setStyleSheet("color : black; background-color : #aeb7b3; font : 20px; font-family : Sanserif;")
 
-        table.setGeometry(0, 0, 320, 240)
-        table.resizeRowsToContents()
-        table.resizeColumnsToContents()
+        self.table.setGeometry(0, 0, 320, 240)
+        self.table.resizeRowsToContents()
+        self.table.resizeColumnsToContents()
 
-        self.vbox.addWidget(lbl1)
-        self.vbox.addWidget(table)
+        self.vbox.addWidget(self.lbl1)
+        self.vbox.addWidget(self.table)
         self.vbox.addWidget(self.btn1)
 
     def btn1Action(self):
@@ -174,7 +177,10 @@ class InsertRecords(QDialog):
         else:
             try:
                 self.sql.insert(str(self.txt1.text()), int(self.txt2.text(), 16), int(self.txt3.text()))
-                msg.information(self, "Success!", "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(), self.txt2.text(), self.txt3.text()))
+                msg.information(self, "Success!",
+                                "Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}".format(self.txt1.text(),
+                                                                                               self.txt2.text(),
+                                                                                               self.txt3.text()))
             except OperationalError:
                 msg.warning(self, "Failed!", "Data Insertion Failed!\nNo Record Inserted")
         self.switch_back.emit(self)
@@ -183,19 +189,52 @@ class InsertRecords(QDialog):
 class DeleteRecords(ViewRecords):
     def __init__(self, sql):
         super().__init__(sql)
+        self.btn2 = None
+        self.comboBox = None
+        self.users = self.sql.readAll()
+        self.name = []
         self.InitNew()
 
     def InitNew(self):
-        comboBox = QComboBox(self)
-        comboBox.addItem("motif")
-        comboBox.addItem("Windows")
-        comboBox.addItem("cde")
-        comboBox.addItem("Plastique")
-        comboBox.addItem("Cleanlooks")
-        comboBox.addItem("windowsvista")
 
-        self.vbox.addWidget(comboBox)
+        self.btn2 = QPushButton("Delete Selected", self)
+        self.btn2.setStyleSheet("background-color : #d30000; color : #FAFAFA; font : 20px; font-family : Sanserif;")
+
+        for user in self.users:
+            self.name.append(user[1])
+
+        self.comboBox = QComboBox(self)
+        for i in range(len(self.users)):
+            self.comboBox.addItem(self.name[i])
+
+        self.btn2.clicked.connect(self.btn2Action)
+
+        self.vbox.addWidget(self.comboBox)
+        self.vbox.addWidget(self.btn2)
         self.vbox.addWidget(self.btn1)
+
+    def btn2Action(self):
+        name = self.comboBox.currentText()
+        ret = QMessageBox.question(self,
+                                   "Delete Record",
+                                   "Are you sure you want to delete {}'s record?".format(name),
+                                   QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if ret == QMessageBox.Yes:
+            self.sql.delete("Name", self.comboBox.currentText())
+            QMessageBox.information(self,
+                                    "Delete Record",
+                                    "You have successfully deleted {}'s record.".format(name))
+            self.vbox.removeWidget(self.btn1)
+            self.vbox.removeWidget(self.btn2)
+            self.vbox.removeWidget(self.comboBox)
+            self.vbox.removeWidget(self.lbl1)
+            self.vbox.removeWidget(self.table)
+            self.InitComponents()
+            self.InitNew()
+            self.show()
+
+        else:
+            pass
 
 
 class Admin(QDialog):
