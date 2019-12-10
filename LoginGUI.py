@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from AdminGUI import Admin
 import sys
 
 
@@ -9,20 +8,20 @@ class customLineEdit(QLineEdit):
     def focusInEvent(self, QFocusEvent):
         if self.text() == 'Username':
             self.setText('')
-            self.setStyleSheet("color : white;")
+            self.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : white;")
         if self.text() == 'Password':
             self.setText('')
             self.setEchoMode(QLineEdit.Password)
-            self.setStyleSheet("color : white;")
+            self.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : white;")
 
     def focusOutEvent(self, QFocusEvent):
         if self.text() == '' and self.objectName() == 'User':
             self.setText('Username')
-            self.setStyleSheet("color : gray;")
+            self.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #9E9E9E;")
         if self.text() == '' and self.objectName() == 'Pass':
             self.setText('Password')
             self.setEchoMode(QLineEdit.Normal)
-            self.setStyleSheet("color : gray;")
+            self.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #9E9E9E;")
 
 
 class Login(QDialog):
@@ -34,8 +33,8 @@ class Login(QDialog):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.usr = None
@@ -53,8 +52,8 @@ class Login(QDialog):
         self.setMinimumHeight(self.height)
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
-        self.vbox.setSpacing(1)
-        self.setStyleSheet("background-color: #212121;")
+        self.vbox.setSpacing(10)
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -62,10 +61,18 @@ class Login(QDialog):
     def InitComponents(self):
         self.usr = customLineEdit("Username", self)
         self.pwd = customLineEdit("Password", self)
-        self.usr.setStyleSheet("color : gray;")
-        self.pwd.setStyleSheet("color : gray;")
+        self.usr.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #9E9E9E;")
+        self.pwd.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #9E9E9E;")
+        self.usr.setFixedHeight(50)
+        self.pwd.setFixedHeight(50)
+
         btn1 = QPushButton("Login", self)
         btn2 = QPushButton("Back", self)
+
+        btn1.setFixedHeight(40)
+
+        btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
 
         self.usr.setObjectName("User")
         self.pwd.setObjectName("Pass")

@@ -2,7 +2,7 @@ from camproc import processing
 from serial import serialutil
 import argparse
 from AboutGUI import About
-from ScanGUI import Scan
+from ScanGUI import Scan, Register
 from LoginGUI import Login
 from CameraGUI import Cam
 from AdminGUI import *
@@ -23,8 +23,8 @@ class Window(QWidget):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
@@ -42,14 +42,14 @@ class Window(QWidget):
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
         self.vbox.setSpacing(5)
-        self.setStyleSheet("background-color: #212121;")
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
     def InitComponents(self):
         lbl1 = QLabel("Welcome to MR BIN", self)
-        lbl1.setStyleSheet("font : 30px; font-family : Sanserif;")
+        lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : #e1efe6")
         lbl1.setAlignment(Qt.AlignHCenter)
 
         btn1 = QPushButton("Start MR BIN", self)
@@ -57,6 +57,12 @@ class Window(QWidget):
         btn3 = QPushButton("Administrator Mode", self)
         btn4 = QPushButton("About", self)
         btn5 = QPushButton("Exit", self)
+
+        btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn3.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn4.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn5.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
 
         btn1.clicked.connect(self.btn1Action)
         btn2.clicked.connect(self.btn2Action)
@@ -111,6 +117,19 @@ class Controller:
         self.admin = None
         self.view = None
         self.insert = None
+        self.register = None
+        self.delete = None
+
+        try:
+            self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
+            print("SQL Connection Success")
+        except OperationalError:
+            print("Error connecting to database")
+        try:
+            self.reader = SerialListener().start()
+            self.reader.pause()
+        except serialutil.SerialException:
+            print("No Arduino!")
 
     def show_window(self, prev_window):
         self.window = Window()
@@ -121,11 +140,16 @@ class Controller:
             prev_window.close()
 
     def show_scan(self):
-        self.scan = Scan()
+        self.scan = Scan(self.reader)
         self.window.close()
         self.scan.switch_back.connect(self.show_window)
         self.scan.switch_cam.connect(self.show_cam)
-        self.scan.switch_register.connect(self.show_insert)
+        self.scan.switch_register.connect(self.show_register)
+
+    def show_register(self, uid):
+        self.register = Register(self.sql, uid)
+        self.scan.close()
+        self.register.switch_back.connect(self.show_scan)
 
     def show_login(self):
         self.login = Login()
@@ -144,27 +168,32 @@ class Controller:
         self.scan.close()
 
     def show_admin(self, prev_window=None):
-        self.admin = Admin()
+        self.admin = Admin(self.sql)
         self.admin.switch_back.connect(self.show_window)
         self.admin.switch_view.connect(self.show_view)
         self.admin.switch_insert.connect(self.show_insert)
+        self.admin.switch_delete.connect(self.show_delete)
         self.login.close()
         if prev_window is not None:
             prev_window.close()
 
-    def show_view(self, sql):
-        self.view = ViewRecords(sql)
+    def show_view(self):
+        self.view = ViewRecords(self.sql)
         self.view.switch_back.connect(self.show_admin)
         self.admin.close()
 
-    def show_insert(self, sql):
-        self.insert = InsertRecords(sql)
+    def show_insert(self):
+        self.insert = InsertRecords(self.sql)
         self.insert.switch_back.connect(self.show_admin)
+        self.admin.close()
+
+    def show_delete(self):
+        self.delete = DeleteRecords(self.sql)
+        self.delete.switch_back.connect(self.show_admin)
         self.admin.close()
 
 
 if __name__ == "__main__":
-    print("Initializing, please wait...")
     object_detected = False
     
     parser = argparse.ArgumentParser()

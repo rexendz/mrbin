@@ -1,5 +1,6 @@
 import pymysql
 
+
 class SQLServer:
     def __init__(self, host="localhost", user="root", passwd="", database="mrbin"):
         self.conn = pymysql.connect(

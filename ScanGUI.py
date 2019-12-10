@@ -2,8 +2,24 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from arduino import SerialListener
 from sql import SQLServer
+from AdminGUI import InsertRecords
+from pymysql import OperationalError
+
+
+class Register(InsertRecords):
+    switch_back = pyqtSignal(QDialog)
+
+    def __init__(self, sql, uid):
+        super().__init__(sql)
+        self.uid = uid
+        self.txt2.setText(self.uid)
+        self.txt3.setText('0')
+        self.txt2.setDisabled(True)
+        self.lbl4.hide()
+        self.txt3.hide()
+
+        self.txt2.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : gray;")
 
 
 class Worker(QObject):
@@ -11,14 +27,15 @@ class Worker(QObject):
     auth = pyqtSignal(str, int)
     register = pyqtSignal(str, SQLServer)
 
-    def __init__(self, parent=None):
+    def __init__(self, reader, parent=None):
         QObject.__init__(self, parent=parent)
         self.userAuthenticated = False
         self.continue_run = True
         self.sql = SQLServer()
+        self.reader = reader
+        self.reader.resume()
         self.name = None
         self.pts = None
-        self.reader = SerialListener().start()
 
     def do_work(self):
         while self.continue_run:  # give the loop a stoppable condition
@@ -36,6 +53,7 @@ class Worker(QObject):
                     self.userAuthenticated = True
                     self.continue_run = False
                     self.auth.emit(self.name, self.pts)
+                    self.reader.pause()
                 else:
                     self.reader.write('X')
                     self.register.emit(uid, self.sql)
@@ -54,17 +72,19 @@ class Scan(QDialog):
     stop_signal = pyqtSignal()
     switch_cam = pyqtSignal(str, int)
     switch_back = pyqtSignal(QDialog)
-    switch_register = pyqtSignal(SQLServer, str)
+    switch_register = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, reader):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
+
+        self.reader = reader
 
         self.thread = None
         self.worker = None
@@ -76,7 +96,7 @@ class Scan(QDialog):
 
     def InitWorker(self):
         self.thread = QThread(parent=self)
-        self.worker = Worker()
+        self.worker = Worker(self.reader)
 
         self.stop_signal.connect(self.worker.stop)
         self.worker.moveToThread(self.thread)
@@ -106,8 +126,12 @@ class Scan(QDialog):
                                    "Your UID: {} is not listed in our database\nCreate new account?".format(uid),
                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if ret == QMessageBox.Yes:
-            self.switch_register.emit(sql, uid)
-
+            self.stop_signal.emit()
+            self.switch_register.emit(uid)
+            self.worker.userAuthenticated = False
+            self.reader.pause()
+        else:
+            pass
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
@@ -118,14 +142,14 @@ class Scan(QDialog):
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
         self.vbox.setSpacing(10)
-        self.setStyleSheet("background-color: #212121;")
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
     def InitComponents(self):
         lbl1 = QLabel("Please Scan your ID", self)
-        lbl1.setStyleSheet("font : 30px; font-family : Sanserif;")
+        lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : #e1efe6")
         lbl1.setAlignment(Qt.AlignHCenter)
 
         lbl2 = QLabel(self)
@@ -138,11 +162,14 @@ class Scan(QDialog):
         btn1 = QPushButton("Back", self)
         btn1.clicked.connect(self.btn1Action)
 
+        btn1.setStyleSheet("color : white; background-color : #d50000; font : 20px; font-family : Sanserif;")
+
         self.vbox.addWidget(lbl1)
         self.vbox.addWidget(lbl2)
         self.vbox.addWidget(btn1)
 
     def btn1Action(self):
         print(self)
+        self.reader.pause()
         self.stop_signal.emit()
         self.switch_back.emit(self)

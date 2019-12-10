@@ -43,6 +43,9 @@ class SerialListener:
     def stop(self):
         self.stopped = True
 
+    def resume(self):
+        self.stopped = False
+
     def pause(self):
         self.paused = True
 
