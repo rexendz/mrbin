@@ -32,16 +32,17 @@ class SQLServer:
         self.commit()
         print(self.curr.rowcount, "record updated")
 
-    def updateIncrement(self, table="Users"):
-        nextID = self.getLength() + 1
-        self.query = "ALTER TABLE {} AUTO_INCREMENT = {}".format(table, nextID)
-        self.execute()
-        self.query = """
-        SET @count = 0;
-        UPDATE {} SET {}.id = @count:= @count + 1;
-        """.format(table, table)
+    def updateId(self, table="Users"):
+        self.query = "SET @count = 0;\nUPDATE {} SET `id` = @count:= @count + 1;".format(table)
         self.execute()
         self.commit()
+        print("Id Updated")
+
+    def updateIncrement(self, table="Users"):
+        self.query = "ALTER TABLE {} AUTO_INCREMENT = 1;".format(table)
+        self.execute()
+        self.commit()
+        print("Auto_Increment Updated")
 
     def delete(self, Where, WhereVal, table="Users"):
         if Where == "Name":
@@ -51,7 +52,6 @@ class SQLServer:
         self.execute()
         self.commit()
         print(self.curr.rowcount, "record deleted")
-        self.updateIncrement(table)
 
     def deleteLatest(self):
         self.delete("ID", self.getLength())

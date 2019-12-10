@@ -139,9 +139,9 @@ class Controller:
         if prev_window is not None:
             prev_window.close()
 
-    def show_scan(self):
+    def show_scan(self, prev_window):
         self.scan = Scan(self.reader)
-        self.window.close()
+        prev_window.close()
         self.scan.switch_back.connect(self.show_window)
         self.scan.switch_cam.connect(self.show_cam)
         self.scan.switch_register.connect(self.show_register)
