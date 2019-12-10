@@ -5,7 +5,6 @@ from sql import SQLServer
 from pymysql.err import OperationalError
 import sys
 
-
 class ViewRecords(QDialog):
     switch_back = pyqtSignal(QDialog)
 
@@ -14,11 +13,12 @@ class ViewRecords(QDialog):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.sql = sql
+        self.btn1 = None
         self.InitWindow()
         self.InitComponents()
         self.show()
@@ -32,7 +32,7 @@ class ViewRecords(QDialog):
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
         self.vbox.setSpacing(1)
-        self.setStyleSheet("background-color: #212121;")
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -56,12 +56,14 @@ class ViewRecords(QDialog):
                     table.setItem(i, j, QTableWidgetItem(str(result[i][j])))
 
         lbl1 = QLabel("MR BIN Users", self)
-        lbl1.setStyleSheet("font : 15px; font-family : Sanserif;")
+        lbl1.setStyleSheet("font : 40px; font-family : Sanserif;")
         lbl1.setAlignment(Qt.AlignHCenter)
 
-        btn1 = QPushButton(self)
-        btn1.setText("Close")
-        btn1.clicked.connect(self.btn1Action)
+        self.btn1 = QPushButton(self)
+        self.btn1.setText("Close")
+        self.btn1.clicked.connect(self.btn1Action)
+
+        self.btn1.setStyleSheet("color : white; background-color : #d50000; font : 20px; font-family : Sanserif;")
 
         table.setGeometry(0, 0, 320, 240)
         table.resizeRowsToContents()
@@ -69,7 +71,7 @@ class ViewRecords(QDialog):
 
         self.vbox.addWidget(lbl1)
         self.vbox.addWidget(table)
-        self.vbox.addWidget(btn1)
+        self.vbox.addWidget(self.btn1)
 
     def btn1Action(self):
         self.switch_back.emit(self)
@@ -83,8 +85,8 @@ class InsertRecords(QDialog):
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.gbox = QGridLayout()
@@ -94,6 +96,8 @@ class InsertRecords(QDialog):
         self.txt1 = None
         self.txt2 = None
         self.txt3 = None
+
+        self.lbl4 = None
 
         self.InitWindow()
         self.InitComponents()
@@ -108,8 +112,8 @@ class InsertRecords(QDialog):
         self.setMinimumHeight(self.height)
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
-        self.vbox.setSpacing(15)
-        self.setStyleSheet("background-color: #212121;")
+        self.vbox.setSpacing(10)
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -120,17 +124,30 @@ class InsertRecords(QDialog):
         lbl1 = QLabel("Insert Record", self)
         lbl2 = QLabel("Name", self)
         lbl3 = QLabel("RFID in Hex", self)
-        lbl4 = QLabel("Incentives", self)
+        self.lbl4 = QLabel("Incentives", self)
 
-        lbl1.setStyleSheet("font : 25px; font-family : Sanserif;")
+        lbl2.setStyleSheet("color : #FAFAFA; font : 20px; font-family : Sanserif;")
+        lbl3.setStyleSheet("color : #FAFAFA; font : 20px; font-family : Sanserif;")
+        self.lbl4.setStyleSheet("color : #FAFAFA; font : 20px; font-family : Sanserif;")
+
+        lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : #e1efe6;")
         lbl1.setAlignment(Qt.AlignHCenter)
 
         self.txt1 = QLineEdit()
         self.txt2 = QLineEdit()
         self.txt3 = QLineEdit()
 
+        self.txt3.setValidator(QIntValidator())
+
+        self.txt1.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #F5F5F5;")
+        self.txt2.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #F5F5F5;")
+        self.txt3.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : #F5F5F5;")
+
         btn1 = QPushButton("Cancel", self)
         btn2 = QPushButton("Insert", self)
+
+        btn1.setStyleSheet("background-color : #d50000; color : #FAFAFA; font : 20px; font-family : Sanserif;")
+        btn2.setStyleSheet("background-color : #1B5E20; color : #FAFAFA; font : 20px; font-family : Sanserif;")
 
         btn1.clicked.connect(self.btn1Action)
         btn2.clicked.connect(self.btn2Action)
@@ -142,7 +159,7 @@ class InsertRecords(QDialog):
         gbox.addWidget(self.txt1, 0, 1)
         gbox.addWidget(lbl3, 1, 0)
         gbox.addWidget(self.txt2, 1, 1)
-        gbox.addWidget(lbl4, 2, 0)
+        gbox.addWidget(self.lbl4, 2, 0)
         gbox.addWidget(self.txt3, 2, 1)
         gbox.addWidget(btn1, 3, 0)
         gbox.addWidget(btn2, 3, 1)
@@ -163,27 +180,42 @@ class InsertRecords(QDialog):
         self.switch_back.emit(self)
 
 
+class DeleteRecords(ViewRecords):
+    def __init__(self, sql):
+        super().__init__(sql)
+        self.InitNew()
+
+    def InitNew(self):
+        comboBox = QComboBox(self)
+        comboBox.addItem("motif")
+        comboBox.addItem("Windows")
+        comboBox.addItem("cde")
+        comboBox.addItem("Plastique")
+        comboBox.addItem("Cleanlooks")
+        comboBox.addItem("windowsvista")
+
+        self.vbox.addWidget(comboBox)
+        self.vbox.addWidget(self.btn1)
+
+
 class Admin(QDialog):
     switch_back = pyqtSignal(QDialog)
-    switch_insert = pyqtSignal(SQLServer)
-    switch_view = pyqtSignal(SQLServer, str)
+    switch_insert = pyqtSignal()
+    switch_view = pyqtSignal()
+    switch_delete = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, sql):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.usr = None
         self.pwd = None
-        try:
-            self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
-            print("SQL Connection Success")
-        except OperationalError:
-            print("Error connecting to database")
+        self.sql = sql
         self.InitWindow()
         self.InitComponents()
 
@@ -198,14 +230,14 @@ class Admin(QDialog):
         self.setMinimumWidth(self.width)
         self.vbox.setGeometry(QRect(self.left, self.top, self.width, self.height))
         self.vbox.setSpacing(1)
-        self.setStyleSheet("background-color: #212121;")
+        self.setStyleSheet("background-color: #297045;")
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
     def InitComponents(self):
         lbl1 = QLabel("Administrator Mode", self)
-        lbl1.setStyleSheet("font : 30px; font-family : Sanserif;")
+        lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : #e1efe6")
         lbl1.setAlignment(Qt.AlignHCenter)
 
         btn1 = QPushButton("View Records", self)
@@ -213,6 +245,12 @@ class Admin(QDialog):
         btn3 = QPushButton("Delete Record", self)
         btn4 = QPushButton("Modify Record", self)
         btn5 = QPushButton("Back", self)
+
+        btn1.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn3.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn4.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
+        btn5.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
 
         btn1.clicked.connect(self.btn1Action)
         btn2.clicked.connect(self.btn2Action)
@@ -228,13 +266,13 @@ class Admin(QDialog):
         self.vbox.addWidget(btn5)
 
     def btn1Action(self):
-        self.switch_view.emit(self.sql, None)
+        self.switch_view.emit()
 
     def btn2Action(self):
-        self.switch_insert.emit(self.sql)
+        self.switch_insert.emit()
 
     def btn3Action(self):
-        pass
+        self.switch_delete.emit()
 
     def btn4Action(self):
         pass

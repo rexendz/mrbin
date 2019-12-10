@@ -48,8 +48,8 @@ class About(QDialog):
         self.title = "MR BIN"
         self.top = 0
         self.left = 0
-        self.width = 320
-        self.height = 240
+        self.width = 480
+        self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
@@ -71,12 +71,12 @@ class About(QDialog):
         label1 = AnimationLabel("Machine for Recycling Bottles\nwith\nIncentive Noting\n\n(MR BIN)\n")
         label1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label1.setAlignment(Qt.AlignCenter)
-        label1.setStyleSheet("font : 20px; font : bold; font-family : Sanserif;")
+        label1.setStyleSheet("font : 30px; font : bold; font-family : Sanserif;")
 
         label2 = AnimationLabel("Created By\n\nRex Christian R. Endozo\n\nand\n\nJohn Ray F. Navarro")
         label2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label2.setAlignment(Qt.AlignCenter)
-        label2.setStyleSheet("font : 20px; font : bold; font-family : Sanserif;")
+        label2.setStyleSheet("font : 30px; font : bold; font-family : Sanserif;")
         label1.hide()
         label2.hide()
 
