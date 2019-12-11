@@ -119,6 +119,7 @@ class Controller:
         self.insert = None
         self.register = None
         self.delete = None
+        self.modify = None
 
         try:
             self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
@@ -132,65 +133,70 @@ class Controller:
             print("No Arduino!")
 
     def show_window(self, prev_window):
+        if prev_window is not None:
+            prev_window.hide()
         self.window = Window()
         self.window.switch_scan.connect(self.show_scan)
         self.window.switch_about.connect(self.show_about)
         self.window.switch_login.connect(self.show_login)
-        if prev_window is not None:
-            prev_window.close()
 
     def show_scan(self, prev_window):
+        prev_window.hide()
         self.scan = Scan(self.reader)
-        prev_window.close()
         self.scan.switch_back.connect(self.show_window)
         self.scan.switch_cam.connect(self.show_cam)
         self.scan.switch_register.connect(self.show_register)
 
     def show_register(self, uid):
+        self.scan.hide()
         self.register = Register(self.sql, uid)
-        self.scan.close()
         self.register.switch_back.connect(self.show_scan)
 
     def show_login(self):
+        self.window.hide()
         self.login = Login()
         self.login.switch_back.connect(self.show_window)
         self.login.switch_admin.connect(self.show_admin)
-        self.window.close()
 
     def show_about(self):
+        self.window.hide()
         self.about = About()
         self.about.switch_back.connect(self.show_window)
-        self.window.close()
 
     def show_cam(self, name, pts):
+        self.scan.hide()
         self.cam = Cam(self.device, self.url, name, pts)
         self.cam.switch_back.connect(self.show_window)
-        self.scan.close()
 
     def show_admin(self, prev_window=None):
+        if prev_window is not None:
+            prev_window.hide()
         self.admin = Admin(self.sql)
         self.admin.switch_back.connect(self.show_window)
         self.admin.switch_view.connect(self.show_view)
         self.admin.switch_insert.connect(self.show_insert)
         self.admin.switch_delete.connect(self.show_delete)
-        self.login.close()
-        if prev_window is not None:
-            prev_window.close()
+        self.admin.switch_modify.connect(self.show_modify)
 
     def show_view(self):
+        self.admin.hide()
         self.view = ViewRecords(self.sql)
         self.view.switch_back.connect(self.show_admin)
-        self.admin.close()
 
     def show_insert(self):
+        self.admin.hide()
         self.insert = InsertRecords(self.sql)
         self.insert.switch_back.connect(self.show_admin)
-        self.admin.close()
 
     def show_delete(self):
+        self.admin.hide()
         self.delete = DeleteRecords(self.sql)
         self.delete.switch_back.connect(self.show_admin)
-        self.admin.close()
+
+    def show_modify(self):
+        self.admin.hide()
+        self.modify = ModifyRecords(self.sql)
+        self.modify.switch_back.connect(self.show_admin)
 
 
 if __name__ == "__main__":

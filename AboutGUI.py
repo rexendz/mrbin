@@ -36,7 +36,7 @@ class AnimationLabel(QLabel):
         self.startFadeIn()
         loop = QEventLoop()
         self.animation.finished.connect(loop.quit)
-        loop.exec_()
+        loop.exec()
         QTimer.singleShot(2000, self.startFadeOut)
 
 
@@ -77,7 +77,7 @@ class About(QDialog):
         label2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label2.setAlignment(Qt.AlignCenter)
         label2.setStyleSheet("font : 30px; font : bold; font-family : Sanserif; color : #e1efe6")
-        label1.hide()
+
         label2.hide()
 
         btn1 = QPushButton("Go Back", self)
