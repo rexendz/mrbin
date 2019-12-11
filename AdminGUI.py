@@ -50,6 +50,7 @@ class ViewRecords(QDialog):
         self.table.setHorizontalHeaderLabels(['ID', 'Name', 'RFID-UID', 'Incentives'])
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         for i in range(len(result)):
             for j in range(4):
@@ -224,6 +225,8 @@ class DeleteRecords(ViewRecords):
             QMessageBox.information(self,
                                     "Delete Record",
                                     "You have successfully deleted {}'s record.".format(name))
+            self.sql.updateId()
+            self.sql.updateIncrement()
             self.vbox.removeWidget(self.btn1)
             self.vbox.removeWidget(self.btn2)
             self.vbox.removeWidget(self.comboBox)
@@ -237,11 +240,90 @@ class DeleteRecords(ViewRecords):
             pass
 
 
+class ModifyRecords(ViewRecords):
+    def __init__(self, sql):
+        super().__init__(sql)
+        self.btn2 = None
+        self.users = None
+        self.id = []
+        self.name = []
+        self.rfid = []
+        self.pts = []
+
+        self.InitNew()
+
+    def InitNew(self):
+        self.users = self.sql.readAll()
+        del self.id[:]
+        del self.name[:]
+        del self.rfid[:]
+        del self.pts[:]
+        for user in self.users:
+            self.id.append(user[0])
+            self.name.append(user[1])
+            self.rfid.append(user[2])
+            self.pts.append(user[3])
+
+        self.table.setEditTriggers(QAbstractItemView.AllEditTriggers)
+        for i in range(len(self.users)):
+            self.table.item(i, 0).setFlags(Qt.ItemIsEditable)
+
+        self.btn2 = QPushButton("Update All")
+        self.btn2.clicked.connect(self.btn2Action)
+
+        lbl2 = QLabel("Double Click Record to Edit")
+        lbl2.setAlignment(Qt.AlignHCenter)
+        lbl2.setStyleSheet('color : gray; font-family : Sanserif; font : 15px;')
+
+        self.vbox.addWidget(lbl2)
+        self.vbox.addWidget(self.btn2)
+        self.vbox.addWidget(self.btn1)
+
+    def btn2Action(self):
+        name = []
+        rfid = []
+        pts = []
+        for i in range(len(self.users)):
+            for j in range(4):
+                if j == 1:
+                    name.append(self.table.item(i, j).text())
+                elif j == 2:
+                    rfid.append(self.table.item(i, j).text())
+                elif j == 3:
+                    pts.append(self.table.item(i, j).text())
+
+        rfid_int = [int(i, 16) for i in rfid]  # Convert string to int
+        pts_int = [int(i) for i in pts]  # Convert string to int
+        changes = []
+
+        for i in range(len(self.users)):
+            if name[i] != self.name[i] or rfid_int[i] != self.rfid[i] or pts_int[i] != self.pts[i]:
+                changes.append(i)
+
+        if self.name == name and self.rfid == rfid_int and self.pts == pts_int:
+            QMessageBox.information(self, "No Records Updates", "There are no changes in the records\nNo records were "
+                                                                "updated.")
+        else:
+            for i in range(len(self.users)):
+                self.sql.modifyRecord(self.id[i], name[i], int(rfid[i], 16), int(pts[i]))
+
+            QMessageBox.information(self, "Records Updated", "{} record/s updated!".format(len(changes)))
+
+            self.vbox.removeWidget(self.btn1)
+            self.vbox.removeWidget(self.btn2)
+            self.vbox.removeWidget(self.lbl1)
+            self.vbox.removeWidget(self.table)
+            self.InitComponents()
+            self.InitNew()
+            self.show()
+
+
 class Admin(QDialog):
     switch_back = pyqtSignal(QDialog)
     switch_insert = pyqtSignal()
     switch_view = pyqtSignal()
     switch_delete = pyqtSignal()
+    switch_modify = pyqtSignal()
 
     def __init__(self, sql):
         super().__init__()
@@ -314,7 +396,7 @@ class Admin(QDialog):
         self.switch_delete.emit()
 
     def btn4Action(self):
-        pass
+        self.switch_modify.emit()
 
     def btn5Action(self):
         self.switch_back.emit(self)

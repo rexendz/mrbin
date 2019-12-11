@@ -20,7 +20,6 @@ class SQLServer:
         """.format(table, name, uid, pts)
         self.execute()
         self.commit()
-        print(self.curr.rowcount, "record inserted")
 
     def update(self, Where, WhereVal, Set, SetVal, table="Users"):
         self.query= """
@@ -30,19 +29,19 @@ class SQLServer:
         """.format(table, Set, SetVal, Where, WhereVal)
         self.execute()
         self.commit()
-        print(self.curr.rowcount, "record updated")
 
     def updateId(self, table="Users"):
-        self.query = "SET @count = 0;\nUPDATE {} SET `id` = @count:= @count + 1;".format(table)
+        self.query = "SET @count = 0;"
+        self.execute()
+        self.query = "UPDATE {} SET id = @count:= @count + 1;".format(table)
         self.execute()
         self.commit()
-        print("Id Updated")
 
     def updateIncrement(self, table="Users"):
-        self.query = "ALTER TABLE {} AUTO_INCREMENT = 1;".format(table)
+        nextId = (int(self.getLength())+1)
+        self.query = "ALTER TABLE {} AUTO_INCREMENT = {};".format(table, nextId)
         self.execute()
         self.commit()
-        print("Auto_Increment Updated")
 
     def delete(self, Where, WhereVal, table="Users"):
         if Where == "Name":
@@ -51,7 +50,6 @@ class SQLServer:
             self.query = "DELETE FROM {} WHERE {} = {}".format(table, Where, WhereVal)
         self.execute()
         self.commit()
-        print(self.curr.rowcount, "record deleted")
 
     def deleteLatest(self):
         self.delete("ID", self.getLength())
@@ -76,6 +74,11 @@ class SQLServer:
         """.format(table, uid)
         self.execute()
         return self.curr.fetchall()
+
+    def modifyRecord(self, id, name, rfid, pts, table="Users"):
+        self.query = "UPDATE {} SET Name = '{}', RFID_UID = {}, Incentives = {} WHERE id = {};".format(table, name, rfid, pts, id)
+        self.execute()
+        self.commit()
 
     def uidIsExisting(self, uid):
         return len(self.findUid(uid))
