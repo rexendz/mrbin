@@ -28,23 +28,20 @@ class imageprocessing:
         else:
             return None  # Which means there are no contours
 
-    def getValidContour(self, cnts, lth, uth):
+    def getPoints(self, cnts, lth, uth):
         for c in cnts:
             if cv2.contourArea(c) > lth or cv2.contourArea(c) < uth:
-                return c
-
-    def getPoints(self, contour):
-        rect = cv2.minAreaRect(contour)
-        box = cv2.boxPoints(rect)
-        box = perspective.order_points(box) # Order 4 points to top left, top right, bottom right, bottom left
-        return box
+                rect = cv2.minAreaRect(c)
+                box = cv2.boxPoints(rect)
+                box = perspective.order_points(box) # Order 4 points to top left, top right, bottom right, bottom left
+                return box
 
     def drawConts(self, img, cnts):
         cv2.drawContours(img, [cnts.astype("int")], -1, (0, 255, 0), 2)
         
     def showImage(self, img):
         cv2.imshow('Board', img)
-        cv2.waitKey() & 0xFF
+        return cv2.waitKey(1) & 0xFF
 
 class scrabble(imageprocessing):
     def __init__(self):
@@ -65,13 +62,13 @@ class scrabble(imageprocessing):
             image_contour = self.getContours(image)
             if image_contour is None:
                 continue
-            valid = self.getValidContour(image_contour, 30000, 40000)
-            board_points = self.getPoints(valid)
-            if board_points is not None:
-                return board_points
+            board_points = self.getPoints(image_contour, 30000, 40000)
+            return board_points
 
-    def drawBoard(self, box):
+
+    def drawBoard(self):
         while not self.stopped:
+            box = self.getBoard()
             self.drawConts(self.img, box)
             keyEscape = self.showImage(self.img)
             if keyEscape == 27:
