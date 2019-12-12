@@ -49,9 +49,9 @@ class imageprocessing:
 class scrabble(imageprocessing):
     def __init__(self):
         self.cam = PiCamera()
-        self.cam.resolution = (480, 320)
+        self.cam.resolution = (320, 240)
         self.cam.framerate = 32
-        self.rawCapture = PiRGBArray(self.cam, size=(480, 320))
+        self.rawCapture = PiRGBArray(self.cam, size=(320, 240))
         self.stream = self.cam.capture_continuous(self.rawCapture, format="bgr", use_video_port=True)
         self.img = None
 
