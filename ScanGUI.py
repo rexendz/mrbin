@@ -63,7 +63,6 @@ class Worker(QObject):
         self.finished.emit()
 
     def stop(self):
-        print("STOPPED")
         self.continue_run = False
 
 
@@ -168,7 +167,6 @@ class Scan(QDialog):
         self.vbox.addWidget(btn1)
 
     def btn1Action(self):
-        print(self)
         self.reader.pause()
         self.stop_signal.emit()
         self.switch_back.emit(self)
