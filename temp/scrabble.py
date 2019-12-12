@@ -58,6 +58,7 @@ class scrabble(imageprocessing):
     def getBoard(self):
         for f in self.stream:
             self.img = f.array
+            self.img = imutils.resize(self.img, 320, 240)
             image = self.smoothImage(self.img)
             image = self.getCanny(image, 50, 100)
             image_contour = self.getContours(image)
