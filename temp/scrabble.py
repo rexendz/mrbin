@@ -55,7 +55,6 @@ class scrabble(imageprocessing):
         self.stream = self.cam.capture_continuous(self.rawCapture, format="bgr", use_video_port=True)
         self.img = None
 
-
     def getBoard(self):
         for f in self.stream:
             self.img = f.array
@@ -65,13 +64,14 @@ class scrabble(imageprocessing):
             if image_contour < 0:
                 continue
             valid = self.getValidContour(image_contour, 30000, 40000)
-            board_pts = self.getPoints(valid)
-            if board_pts is not None:
-                return board_pts
+            board_points = self.getPoints(valid)
+            if board_points is not None:
+                return board_points
             self.rawCapture.truncate(0)
 
     def drawBoard(self, box):
         self.drawConts(self.img, box)
+
 
 if __name__ == "__main__":
     game = scrabble()
