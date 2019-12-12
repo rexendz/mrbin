@@ -64,8 +64,9 @@ class scrabble(imageprocessing):  # class scrabble inherits from imageprocessing
             board_points = self.getPoints(image_contour, 30000, 40000) # get the four points of the detected rectangle from the edges
             return board_points # Give the points to the caller
 
-    def drawBoard(self, box): # Draws the captured image
+    def drawBoard(self): # Draws the captured image
         while not self.stopped: # To stop the infinite loop
+            box = self.getBoard()
             if box is not None: # If there is no contours then...
                 self.drawConts(self.img, box) # Do not draw contours (obviously)
             keyEscape = self.showImage(self.img) # A literal 'escape' key to escape the loop
@@ -76,7 +77,7 @@ class scrabble(imageprocessing):  # class scrabble inherits from imageprocessing
 if __name__ == "__main__":
     game = scrabble()  # Create new object from class scrabble
     boardPoints = game.getBoard()
-    game.drawBoard(boardPoints)
+    game.drawBoard()
 
     (tl, tr, br, bl) = boardPoints
 
