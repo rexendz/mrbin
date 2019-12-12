@@ -26,7 +26,7 @@ class imageprocessing:
             (cnts, _) = contours.sort_contours(cnts)
             return cnts
         else:
-            return -1  # Which means there are no contours
+            return None  # Which means there are no contours
 
     def getValidContour(self, cnts, lth, uth):
         for c in cnts:
@@ -62,7 +62,7 @@ class scrabble(imageprocessing):
             image = self.smoothImage(self.img)
             image = self.getCanny(image, 50, 100)
             image_contour = self.getContours(image)
-            if len(image_contour) < 0:
+            if image_contour is None:
                 continue
             valid = self.getValidContour(image_contour, 30000, 40000)
             board_points = self.getPoints(valid)
