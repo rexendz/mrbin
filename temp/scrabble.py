@@ -62,7 +62,7 @@ class scrabble(imageprocessing):
             image = self.smoothImage(self.img)
             image = self.getCanny(image, 50, 100)
             image_contour = self.getContours(image)
-            if image_contour < 0:
+            if len(image_contour) < 0:
                 continue
             valid = self.getValidContour(image_contour, 30000, 40000)
             board_points = self.getPoints(valid)
@@ -71,6 +71,7 @@ class scrabble(imageprocessing):
 
     def drawBoard(self, box):
         self.drawConts(self.img, box)
+        self.showImage(self.img)
 
 
 if __name__ == "__main__":
