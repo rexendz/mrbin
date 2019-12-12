@@ -44,7 +44,7 @@ class imageprocessing:
         
     def showImage(self, img):
         cv2.imshow('Board', img)
-        cv2.waitKey()
+        cv2.waitKey() & 0xFF
 
 class scrabble(imageprocessing):
     def __init__(self):
@@ -54,6 +54,7 @@ class scrabble(imageprocessing):
         self.rawCapture = PiRGBArray(self.cam, size=(320, 240))
         self.stream = self.cam.capture_continuous(self.rawCapture, format="bgr", use_video_port=True)
         self.img = None
+        self.stopped = False
 
     def getBoard(self):
         for f in self.stream:
@@ -70,8 +71,11 @@ class scrabble(imageprocessing):
                 return board_points
 
     def drawBoard(self, box):
-        self.drawConts(self.img, box)
-        self.showImage(self.img)
+        while not self.stopped:
+            self.drawConts(self.img, box)
+            keyEscape = self.showImage(self.img)
+            if keyEscape == 27:
+                self.stopped = True
 
 
 if __name__ == "__main__":
