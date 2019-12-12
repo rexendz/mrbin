@@ -71,12 +71,12 @@ class About(QDialog):
         label1 = AnimationLabel("Machine for Recycling Bottles\nwith\nIncentive Noting\n\n(MR BIN)\n")
         label1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label1.setAlignment(Qt.AlignCenter)
-        label1.setStyleSheet("font : 30px; font : bold; font-family : Sanserif; color : #e1efe6")
+        label1.setStyleSheet("font : 30px; font : bold; font-family : Sanserif;")
 
         label2 = AnimationLabel("Created By\n\nRex Christian R. Endozo\n\nand\n\nJohn Ray F. Navarro")
         label2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         label2.setAlignment(Qt.AlignCenter)
-        label2.setStyleSheet("font : 30px; font : bold; font-family : Sanserif; color : #e1efe6")
+        label2.setStyleSheet("font : 30px; font : bold; font-family : Sanserif;")
 
         label2.hide()
 

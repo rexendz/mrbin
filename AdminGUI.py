@@ -244,6 +244,7 @@ class ModifyRecords(ViewRecords):
     def __init__(self, sql):
         super().__init__(sql)
         self.btn2 = None
+        self.lbl2 = None
         self.users = None
         self.id = []
         self.name = []
@@ -271,11 +272,11 @@ class ModifyRecords(ViewRecords):
         self.btn2 = QPushButton("Update All")
         self.btn2.clicked.connect(self.btn2Action)
 
-        lbl2 = QLabel("Double Click Record to Edit")
-        lbl2.setAlignment(Qt.AlignHCenter)
-        lbl2.setStyleSheet('color : gray; font-family : Sanserif; font : 15px;')
+        self.lbl2 = QLabel("Double Click Record to Edit")
+        self.lbl2.setAlignment(Qt.AlignHCenter)
+        self.lbl2.setStyleSheet('color : gray; font-family : Sanserif; font : 15px;')
 
-        self.vbox.addWidget(lbl2)
+        self.vbox.addWidget(self.lbl2)
         self.vbox.addWidget(self.btn2)
         self.vbox.addWidget(self.btn1)
 
@@ -312,6 +313,7 @@ class ModifyRecords(ViewRecords):
             self.vbox.removeWidget(self.btn1)
             self.vbox.removeWidget(self.btn2)
             self.vbox.removeWidget(self.lbl1)
+            self.vbox.removeWidget(self.lbl2)
             self.vbox.removeWidget(self.table)
             self.InitComponents()
             self.InitNew()
