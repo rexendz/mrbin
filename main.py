@@ -17,6 +17,7 @@ class Window(QWidget):
     switch_scan = pyqtSignal(QWidget)
     switch_login = pyqtSignal()
     switch_about = pyqtSignal()
+    close_all = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -102,7 +103,7 @@ class Window(QWidget):
         self.switch_about.emit()
 
     def btn5Action(self):
-        sys.exit(self.close())
+        self.close_all.emit()
 
 
 class Controller:
@@ -139,6 +140,7 @@ class Controller:
         self.window.switch_scan.connect(self.show_scan)
         self.window.switch_about.connect(self.show_about)
         self.window.switch_login.connect(self.show_login)
+        self.window.close_all.connect(self.exit)
 
     def show_scan(self, prev_window):
         prev_window.hide()
@@ -197,6 +199,15 @@ class Controller:
         self.admin.hide()
         self.modify = ModifyRecords(self.sql)
         self.modify.switch_back.connect(self.show_admin)
+
+    def exit(self):
+        try:
+            self.reader.stop()
+        except:
+            print("No Arduino")
+        self.sql.close()
+        sys.exit()
+
 
 
 if __name__ == "__main__":
