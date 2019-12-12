@@ -58,7 +58,7 @@ class scrabble(imageprocessing):
     def getBoard(self):
         for f in self.stream:
             self.img = f.array
-            self.img = imutils.resize(self.img, 320, 240)
+            self.rawCapture.truncate(0)
             image = self.smoothImage(self.img)
             image = self.getCanny(image, 50, 100)
             image_contour = self.getContours(image)
@@ -68,7 +68,6 @@ class scrabble(imageprocessing):
             board_points = self.getPoints(valid)
             if board_points is not None:
                 return board_points
-            self.rawCapture.truncate(0)
 
     def drawBoard(self, box):
         self.drawConts(self.img, box)
