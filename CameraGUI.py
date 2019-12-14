@@ -6,7 +6,8 @@ import numpy as np
 import sys
 
 
-class camera(QThread):
+class camera(QObject):
+    finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
 
     def __init__(self, device, url, parent=None):
@@ -15,7 +16,7 @@ class camera(QThread):
         self.url = url
         self.stopped = False
 
-    def run(self):
+    def do_work(self):
         cap = cv2.VideoCapture(self.url)
         while not self.stopped:
             ret, frame = cap.read()
@@ -26,6 +27,10 @@ class camera(QThread):
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
                 p = convertToQtFormat.scaled(300, 300, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
+        self.finished.emit()
+
+    def stop(self):
+        self.stopped = True
 
 
 class Cam(QDialog):
@@ -46,13 +51,30 @@ class Cam(QDialog):
         self.pic = None
         self.device = device
         self.ip = url
-        self.th = camera(self.device, self.ip,parent=self)
-        self.th.changePixmap.connect(self.setImage)
-        self.th.start()
+        self.thread = None
+        self.worker = None
+        self.InitWorker()
         self.InitWindow()
         self.InitComponents()
 
         self.show()
+
+    def InitWorker(self):
+        self.thread = QThread(parent=self)
+        self.worker = camera(self.device, self.ip)
+
+        self.worker.moveToThread(self.thread)
+
+        self.worker.changePixmap.connect(self.setImage)
+
+        self.worker.finished.connect(self.thread.quit)  # connect the workers finished signal to stop thread
+        self.worker.finished.connect(self.worker.deleteLater)  # connect the workers finished signal to clean up worker
+        self.thread.finished.connect(self.thread.deleteLater)  # connect threads finished signal to clean up thread
+        self.thread.finished.connect(self.worker.stop)
+
+        self.thread.started.connect(self.worker.do_work)
+
+        self.thread.start()
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
