@@ -31,7 +31,7 @@ class imageprocessing():
         return result
 
     def contoursOf(self, img):
-        contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours
 
@@ -147,29 +147,31 @@ class scrabble(imageprocessing):
         img = self.dilationOf(img)          #Dilated the edge'd detected image, to reduce noise
 
         cv2.imshow("Edge Detection", img)   #Displayed the clean, edge detected image, for further analization
+        try:
+            self.contours = self.contoursOf(img)    #Gathered the contours of the edge detected image, Ginagawa nito is, sineseparate nya yung mga lines sa edge detected image at stinostore to sa isang array
 
-        self.contours = self.contoursOf(img)    #Gathered the contours of the edge detected image, Ginagawa nito is, sineseparate nya yung mga lines sa edge detected image at stinostore to sa isang array
+            largeContours = self.validContours(img, self.contours)  # gets contours that are large enough to be considered the board, ang ginawa dito is, nag iterate ako sa array ng mga lines na na detect ko sa contours, tapos tiningnan ko if mahaba ba yung line para ma consider sya as board,
+            validContour = self.sortLargeContours(largeContours)   # from the large contours, tinitingnan ko saan dun yung merong, four sides i.e. (box, or rectangle or trapezoid)
 
-        largeContours = self.validContours(img, self.contours)  # gets contours that are large enough to be considered the board, ang ginawa dito is, nag iterate ako sa array ng mga lines na na detect ko sa contours, tapos tiningnan ko if mahaba ba yung line para ma consider sya as board,
-        validContour = self.sortLargeContours(largeContours)   # from the large contours, tinitingnan ko saan dun yung merong, four sides i.e. (box, or rectangle or trapezoid)
-
-        image_possibleContours = copy.deepcopy(img_copy)    #gumawa lang ako ulit ng copy nung original image
-        image_chosenContour = copy.deepcopy(img_copy)       #same lang dito
+            image_possibleContours = copy.deepcopy(img_copy)    #gumawa lang ako ulit ng copy nung original image
+            image_chosenContour = copy.deepcopy(img_copy)       #same lang dito
 
         #------Drinaw ko lang yung mga valid contours dun sa copy ng original image tapos dinisplay para makita nyo------
-        for x in validContour:
-            cv2.drawContours(image_possibleContours, self.contours, x, (1, 1, 255), 3)
-        cv2.imshow("Possible Board Contours", image_possibleContours)
+            for x in validContour:
+                cv2.drawContours(image_possibleContours, self.contours, x, (1, 1, 255), 3)
+            cv2.imshow("Possible Board Contours", image_possibleContours)
         #--------------------------------------------------------------------------------------------------------------
 
 
-        theBoard = self.smallestContour(img, self.contours, validContour)   #Kinuha ko yung pinaka maliit na contour dun sa mga valid contours, iaassume ko na yung pinakamaliit dun is yung contour ng board
-        cv2.drawContours(image_chosenContour, self.contours, theBoard, (255, 1, 1), 3)  #drinaw ko lang ulit yung pinakamaliit na valid contour sa copy ng original image
-        cv2.imshow("Chosen Contour", image_chosenContour)
+            theBoard = self.smallestContour(img, self.contours, validContour)   #Kinuha ko yung pinaka maliit na contour dun sa mga valid contours, iaassume ko na yung pinakamaliit dun is yung contour ng board
+            cv2.drawContours(image_chosenContour, self.contours, theBoard, (255, 1, 1), 3)  #drinaw ko lang ulit yung pinakamaliit na valid contour sa copy ng original image
+            cv2.imshow("Chosen Contour", image_chosenContour)
 
 
-        cornerPoints = self.getCornerOf(self.contours, theBoard);   #Kinuha ko yung corner points nung valid contour
-        img = self.getTrimmedImage(cornerPoints)    #Trimmed the image
+            cornerPoints = self.getCornerOf(self.contours, theBoard);   #Kinuha ko yung corner points nung valid contour
+            img = self.getTrimmedImage(cornerPoints)    #Trimmed the image
+        except:
+            print("No contours detected")
 
         return img #return dun para i display
 
