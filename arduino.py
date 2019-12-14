@@ -27,23 +27,25 @@ class SerialListener:
         return self
 
     def update(self):
-        while not self.paused:
-            if self.stopped:
-                self.ser.close()
-                print("Serial Thread Stopped")
-                print("Serial Port Closed")
-                self.paused = True
-            try:
-                self.stream = self.ser.readline().decode('utf-8')
-            except:
-                self.stream = self.ser.readline().decode('ascii')
-            self.stream = self.stream.rstrip()
+        while True:
+            if not self.paused:
+                if self.stopped:
+                    self.ser.close()
+                    print("Serial Thread Stopped")
+                    print("Serial Port Closed")
+                    self.paused = True
+                try:
+                    self.stream = self.ser.readline().decode('utf-8')
+                except:
+                    self.stream = self.ser.readline().decode('ascii')
+                self.stream = self.stream.rstrip()
 
     def stop(self):
+        self.paused = False
         self.stopped = True
 
     def resume(self):
-        self.stopped = False
+        self.paused = False
 
     def pause(self):
         self.paused = True

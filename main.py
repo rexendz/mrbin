@@ -201,13 +201,12 @@ class Controller:
         self.modify.switch_back.connect(self.show_admin)
 
     def exit(self):
+        self.sql.close()
         try:
             self.reader.stop()
         except:
             print("No Arduino")
-        self.sql.close()
         sys.exit()
-
 
 
 if __name__ == "__main__":
