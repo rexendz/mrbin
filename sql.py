@@ -85,6 +85,7 @@ class SQLServer:
 
     def close(self):
         self.conn.close()
+        print("SQL Closed")
     
 
 if __name__ == "__main__":

@@ -118,7 +118,7 @@ class Scan(QDialog):
                         "Success!", "Welcome, {}\nYour current incentive points is: {}".format(name, pts))
         self.switch_cam.emit(name, pts)
 
-    def register(self, uid, sql):
+    def register(self, uid):
         ret = QMessageBox.question(self,
                                    "No Record in Database",
                                    "Your UID: {} is not listed in our database\nCreate new account?".format(uid),
