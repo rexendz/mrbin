@@ -127,6 +127,8 @@ class scrabble(imageprocessing):
         self.camera = PiCamera()
         self.camera.resolution = (460, 320)
         self.img = np.zeros((460, 320, 3), np.uint8)
+        self.rawCapture = PiRGBArray(self.cam, size=(480, 320))
+        self.stream = self.cam.capture_continuous(self.rawCapture, format="bgr", use_video_port=True)
         self.createMainWindow()
 
     def imageTrackbar(self, x):
@@ -176,17 +178,16 @@ class scrabble(imageprocessing):
 
         return img #return dun para i display
 
-    def getImage(self):
-        self.camera.capture('/home/pi/Desktop/calib.jpg')
-        return cv2.imread('/home/pi/Desktop/calib.jpg')
 
     def createMainWindow(self):
         cv2.namedWindow("image")
         k = 0
         while k != 27:
-            self.img = self.getImage()
-            cv2.imshow("image", self.processedImage(self.img))
-            k = cv2.waitKey()
+            for f in stream:
+                self.img = f.array
+                self.rawCapture.truncate(0)
+                cv2.imshow("image", self.processedImage(self.img))
+                k = cv2.waitKey()
         cv2.destroyAllWindows()
 
 
