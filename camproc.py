@@ -32,7 +32,7 @@ class processing:
         def ignore(x):
             pass
         
-        img = np.zeros([300, 300, 3], np.uint8)
+        img = np.zeros([320, 240, 3], np.uint8)
         
         if self.device == "__PI__":
             if not self.cam_started:
@@ -60,9 +60,9 @@ class processing:
             (cnts, _) = contours.sort_contours(cnts)
 
             for c in cnts:
-                if cv2.contourArea(c) < minarea:
+                if cv2.contourArea(c) < minarea or cv2.contourArea(c) > 30000:
                     continue
-
+                print(cv2.contourArea(c))
                 box = cv2.minAreaRect(c)
                 box = cv2.boxPoints(box)
                 box = np.array(box, dtype="int")
@@ -106,7 +106,7 @@ class processing:
                 return img
             elif window == 2:
                 return edged
-        return np.zeros([300, 300, 3], np.uint8)
+        return np.zeros([240, 320, 3], np.uint8)
 
 
     def release(self):
