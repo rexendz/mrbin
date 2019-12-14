@@ -96,7 +96,7 @@ class Cam(QDialog):
         lbl1 = QLabel(("User: " + self.name), self)
         lbl2 = QLabel(("Current Incentives: " + str(self.pts)), self)
         self.pic = QLabel(self)
-        self.pic.resize(320, 300)
+        self.pic.resize(320, 240)
         self.pic.setAlignment(Qt.AlignHCenter)
         btn1 = QPushButton("Exit", self)
         lbl1.setAlignment(Qt.AlignLeft)
