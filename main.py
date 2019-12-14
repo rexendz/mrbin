@@ -19,7 +19,7 @@ class Window(QWidget):
     switch_about = pyqtSignal()
     close_all = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, arduino):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -28,6 +28,7 @@ class Window(QWidget):
         self.height = 320
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
+        self.arduino = arduino
 
         self.InitWindow()
         self.InitComponents()
@@ -58,6 +59,9 @@ class Window(QWidget):
         btn3 = QPushButton("Administrator Mode", self)
         btn4 = QPushButton("About", self)
         btn5 = QPushButton("Exit", self)
+
+        if not self.arduino:
+            btn1.setDisable(True)
 
         btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
@@ -130,13 +134,15 @@ class Controller:
         try:
             self.reader = SerialListener().start()
             self.reader.pause()
+            self.arduino = True
         except serialutil.SerialException:
             print("No Arduino!")
+            self.arduino = False
 
     def show_window(self, prev_window):
         if prev_window is not None:
             prev_window.hide()
-        self.window = Window()
+        self.window = Window(self.arduino)
         self.window.switch_scan.connect(self.show_scan)
         self.window.switch_about.connect(self.show_about)
         self.window.switch_login.connect(self.show_login)
