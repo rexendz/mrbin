@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import cv2
 import numpy as np
+from camproc import processing
 import sys
 
 
@@ -17,17 +18,15 @@ class camera(QObject):
         self.stopped = False
 
     def do_work(self):
-        cap = cv2.VideoCapture(self.url)
+        cam = processing("__IP__", "http://99.105.2.135:8080/video")
         while not self.stopped:
-            ret, frame = cap.read()
-            if ret:
-                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                h, w, ch = rgbImage.shape
-                bytesPerLine = ch * w
-                convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                p = convertToQtFormat.scaled(300, 300, Qt.KeepAspectRatio)
-                self.changePixmap.emit(p)
-        self.finished.emit()
+            frame = cam.getProcessedImage()
+            rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = rgbImage.shape
+            bytesPerLine = ch * w
+            convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
+            self.changePixmap.emit(p)
 
     def stop(self):
         self.stopped = True
@@ -97,8 +96,8 @@ class Cam(QDialog):
         lbl1 = QLabel(("User: " + self.name), self)
         lbl2 = QLabel(("Current Incentives: " + str(self.pts)), self)
         self.pic = QLabel(self)
-        self.pic.resize(300, 300)
-
+        self.pic.resize(320, 300)
+        self.pic.setAlignment(Qt.AlignHCenter)
         btn1 = QPushButton("Exit", self)
         lbl1.setAlignment(Qt.AlignLeft)
         lbl2.setAlignment(Qt.AlignRight)

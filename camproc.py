@@ -23,34 +23,16 @@ class processing:
         self.diameter = 0
         self.height = 0
         self.cam_started = False
-        self.window_started = False
 
     # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED, 3 - IMAGE&EDGED, 4 - IMAGE&EDGED w/ TRACKS
-    def display_proc(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1500, device="PI"):
+    def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1500):
         def midpoint(ptA, ptB):
             return (ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5
 
         def ignore(x):
             pass
-
-        if not self.window_started:
-            if window == 1:
-                cv2.namedWindow('Image')
-            elif window == 2:
-                cv2.namedWindow('Edged')
-            elif window == 3:
-                cv2.namedWindow('Image')
-                cv2.namedWindow('Edged')
-            elif window == 4:
-                cv2.namedWindow('Image')
-                cv2.namedWindow('Edged')
-                cv2.namedWindow('Tracks')
-                cv2.createTrackbar('lth', 'Tracks', 0, 200, ignore)
-                cv2.createTrackbar('uth', 'Tracks', 60, 200, ignore)
-                cv2.createTrackbar('area', 'Tracks', 1000, 5000, ignore)
-            self.window_started = True
         
-        img = np.zeros([320, 240, 3], np.uint8)
+        img = np.zeros([300, 300, 3], np.uint8)
         
         if self.device == "__PI__":
             if not self.cam_started:
@@ -68,11 +50,7 @@ class processing:
         orig = img.copy()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (7, 7), 0)
-        if window == 4:
-            if self.window_started:
-                edged = cv2.Canny(gray.copy(), cv2.getTrackbarPos('lth', 'Tracks'), cv2.getTrackbarPos('uth', 'Tracks'))
-        else:
-            edged = cv2.Canny(gray.copy(), cannyLTH, cannyUTH)
+        edged = cv2.Canny(gray.copy(), cannyLTH, cannyUTH)
         edged = cv2.dilate(edged, None, iterations=1)
         edged = cv2.erode(edged, None, iterations=1)
 
@@ -82,13 +60,8 @@ class processing:
             (cnts, _) = contours.sort_contours(cnts)
 
             for c in cnts:
-                if window == 4:
-                    if self.window_started:
-                        if cv2.contourArea(c) < cv2.getTrackbarPos('area', 'Tracks') or cv2.contourArea(c) > 5000:
-                            continue
-                else:
-                    if cv2.contourArea(c) < minarea:
-                        continue
+                if cv2.contourArea(c) < minarea:
+                    continue
 
                 box = cv2.minAreaRect(c)
                 box = cv2.boxPoints(box)
@@ -127,17 +100,14 @@ class processing:
                 cv2.putText(img, "{:.1f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.1f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
 
-        if window == 0:
-            cv2.imshow('Image', orig)
-        elif window == 1:
-            cv2.imshow('Image', img)
-        elif window == 2:
-            cv2.imshow('Edged', edged)
-        elif window == 3 or window == 4:
-            cv2.imshow('Image', img)
-            cv2.imshow('Edged', edged)
-        
-        return cv2.waitKey(1) & 0xFF
+            if window == 0:
+                return orig
+            elif window == 1:
+                return img
+            elif window == 2:
+                return edged
+        return np.zeros([300, 300, 3], np.uint8)
+
 
     def release(self):
         if self.device == "__PI__":
