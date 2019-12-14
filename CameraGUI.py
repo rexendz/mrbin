@@ -3,11 +3,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import cv2
 import numpy as np
-from camproc import processing
+from camproc import Processing
 import sys
 
 
-class camera(QObject):
+class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
 
@@ -18,7 +18,7 @@ class camera(QObject):
         self.stopped = False
 
     def do_work(self):
-        cam = processing("__IP__", "http://99.105.2.135:8080/video")
+        cam = Processing(self.device, self.url)
         while not self.stopped:
             frame = cam.getProcessedImage()
             rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -60,7 +60,7 @@ class Cam(QDialog):
 
     def InitWorker(self):
         self.thread = QThread(parent=self)
-        self.worker = camera(self.device, self.ip)
+        self.worker = CameraImage(self.device, self.ip)
 
         self.worker.moveToThread(self.thread)
 
@@ -119,5 +119,5 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__IP__", "http://192.168.1.2:8080/video", "amaze", "959")
+    window = Cam("__IP__", "https://192.168.1.6:8080/video", "amaze", "959")
     app.exec()
