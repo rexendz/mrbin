@@ -172,6 +172,7 @@ class scrabble(imageprocessing):
             img = self.getTrimmedImage(cornerPoints)    #Trimmed the image
         except:
             print("No contours detected")
+            return img_copy
 
         return img #return dun para i display
 
