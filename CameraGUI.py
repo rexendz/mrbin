@@ -11,11 +11,12 @@ class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
 
-    def __init__(self, device, url, reader, parent=None):
+    def __init__(self, device, url, image, reader, parent=None):
         super().__init__(parent)
         self.device = device
         self.url = url
         self.reader = reader
+        self.image = image
         self.stopped = False
         self.objectDetected = False
 
@@ -30,16 +31,19 @@ class CameraImage(QObject):
                     self.objectDetected = True
             elif distance > 10:
                 self.objectDetected = False
+
             if not self.objectDetected:
                 cam.rest()
+
             elif self.objectDetected:
-                frame = cam.getProcessedImage()
+                frame = cam.getProcessedImage(self.image)
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 bytesPerLine = ch * w
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
                 p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
+
         self.reader.write('X')
         self.reader.pause()
         self.finished.emit()
@@ -51,7 +55,7 @@ class CameraImage(QObject):
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
 
-    def __init__(self, device, url, name, pts, reader):
+    def __init__(self, device, url, image, name, pts, reader):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -63,6 +67,7 @@ class Cam(QDialog):
         self.vbox = QVBoxLayout()
         self.name = name
         self.pts = pts
+        self.image = image
         self.pic = None
         self.device = device
         self.ip = url
@@ -77,7 +82,7 @@ class Cam(QDialog):
 
     def InitWorker(self):
         self.thread = QThread(parent=self)
-        self.worker = CameraImage(self.device, self.ip, self.reader)
+        self.worker = CameraImage(self.device, self.ip, self.image, self.reader)
 
         self.worker.moveToThread(self.thread)
 
@@ -131,7 +136,6 @@ class Cam(QDialog):
 
     def btn1Action(self):
         self.worker.stop()
-        self.close()
         self.switch_back.emit(self)
 
 

@@ -110,9 +110,10 @@ class Window(QWidget):
 
 
 class Controller:
-    def __init__(self, dev, ur):
+    def __init__(self, dev, ur, image):
         self.device = dev
         self.url = ur
+        self.image = image
         self.window = None
         self.scan = None
         self.about = None
@@ -172,7 +173,7 @@ class Controller:
 
     def show_cam(self, name, pts):
         self.scan.hide()
-        self.cam = Cam(self.device, self.url, name, pts, self.reader)
+        self.cam = Cam(self.device, self.url, self.image, name, pts, self.reader)
         self.cam.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):
@@ -207,25 +208,21 @@ class Controller:
 
     def exit(self):
         self.sql.close()
-        try:
+        if self.arduino:
             self.reader.stop()
-        except:
-            print("No Arduino")
         sys.exit()
 
 
 if __name__ == "__main__":
-    object_detected = False
-    
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--ip", help="Select IP Camera with URL Instead Of PI Camera")
-    parser.add_argument("-w", "--window", help="Select Window To Display[0-4]", type=int)
+    parser.add_argument("-w", "--window", help="Select Window To Display[0-2]", type=int)
     
     args = parser.parse_args()
     
     device = "__PI__"
     url = "0.0.0.0"
-    window = 1;
+    window = 0;  # 0 - Raw image, 1 - Processed image, 2 - Edge masks
     
     if args.ip is not None:
         device = "__IP__"
@@ -235,41 +232,6 @@ if __name__ == "__main__":
 
     userAuthenticated = False
     app = QApplication(sys.argv)
-    controller = Controller(device, url)
+    controller = Controller(device, url, window)
     controller.show_window(None)
     app.exec()
-
-
-    while True:
-        try:
-            distance = reader.readDistance()
-            if 18 >= distance > 2:
-                if not object_detected:
-                    # print("Object Detected!")
-                    # print("Distance from sensor: ", reader.readDistance())
-                    object_detected = True
-            
-            elif distance > 10:
-                object_detected = False
-        except NameError:
-            object_detected = True  # IF there is no Arduino, always show image
-
-        if not object_detected:
-            # print("Object is not detected!")
-            processor.rest()
-            
-        elif object_detected:
-            # window=0 --- Raw Image from Camera
-            # window=1 --- Image w/ Detection
-            # window=2 --- Edge Mask
-            # window=3 --- Image w/ Detection & Edge Mask
-            # window=4 --- Image w/ Detection & Edge Mask & trackbars
-            k = processor.display_proc(window=window)
-            
-            if k == 27:
-                break
-    try:
-        reader.stop()
-    except NameError:
-        print("Warning: No Arduino")
-    processor.release()

@@ -36,6 +36,7 @@ class Worker(QObject):
         self.pts = None
 
     def do_work(self):
+        self.reader.write('Y')
         while self.continue_run:  # give the loop a stoppable condition
             self.reader.resume()
             uid = ''
