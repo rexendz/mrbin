@@ -84,9 +84,18 @@ void loop() {
   }
   
   while(userAuthenticated){
-    digitalWrite(LED, HIGH);
-    Serial.println(getDistance());
-    delay(100);
+    char rx;
+    rx = Serial.read();
+    if(rx == 'X'){
+      digitalWrite(LED, LOW);
+      userAuthenticated = false;
+      readStatus = false;
+    }
+    else{
+      digitalWrite(LED, HIGH);
+      Serial.println(getDistance());
+      delay(100);
+    }
   }
 }
 

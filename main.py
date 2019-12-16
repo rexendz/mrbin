@@ -1,4 +1,3 @@
-from camproc import processing
 from serial import serialutil
 import argparse
 from AboutGUI import About
@@ -173,7 +172,7 @@ class Controller:
 
     def show_cam(self, name, pts):
         self.scan.hide()
-        self.cam = Cam(self.device, self.url, name, pts)
+        self.cam = Cam(self.device, self.url, name, pts, self.reader)
         self.cam.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):
@@ -226,7 +225,7 @@ if __name__ == "__main__":
     
     device = "__PI__"
     url = "0.0.0.0"
-    window = 4;
+    window = 1;
     
     if args.ip is not None:
         device = "__IP__"
@@ -235,13 +234,11 @@ if __name__ == "__main__":
         window = args.window
 
     userAuthenticated = False
-
     app = QApplication(sys.argv)
     controller = Controller(device, url)
     controller.show_window(None)
     app.exec()
 
-    processor = processing(device=device, url=url)
 
     while True:
         try:
