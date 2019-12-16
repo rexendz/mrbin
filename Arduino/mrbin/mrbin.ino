@@ -20,6 +20,7 @@ MFRC522 rfid(10, 9);
 unsigned long timer = 0;
 bool readStatus = false;
 bool userAuthenticated = false;
+char started;
 
 void setup() {
   pinMode(LED, OUTPUT);
@@ -33,68 +34,72 @@ void setup() {
 }
 
 void loop() {
-  while(!readStatus){
-    if(rfid.PICC_IsNewCardPresent()){
-      if(rfid.PICC_ReadCardSerial()){
-        byte uid[rfid.uid.size];
-        if((millis() - timer) > 1000){
-          for(int i = 0; i < rfid.uid.size; i++)
-            uid[i] = rfid.uid.uidByte[i];
-
-          for(int i = 0; i < sizeof(uid); i++){
-            if(uid[i] < 0x10)
-              Serial.print('0');
-
-            Serial.print(uid[i], HEX);
+  started = Serial.read();
+  while(started == 'Y'){
+    while(!readStatus){
+      if(rfid.PICC_IsNewCardPresent()){
+        if(rfid.PICC_ReadCardSerial()){
+          byte uid[rfid.uid.size];
+          if((millis() - timer) > 1000){
+            for(int i = 0; i < rfid.uid.size; i++)
+              uid[i] = rfid.uid.uidByte[i];
+  
+            for(int i = 0; i < sizeof(uid); i++){
+              if(uid[i] < 0x10)
+                Serial.print('0');
+  
+              Serial.print(uid[i], HEX);
+            }
+            Serial.println();
+            readStatus = true;
+            timer = millis();
+            delay(100);
           }
-          Serial.println();
-          readStatus = true;
-          timer = millis();
-          delay(100);
+          
         }
-        
       }
     }
-  }
-
-  if(readStatus){
-    while(!Serial.available());
   
-    char rx;
-  
-    while(Serial.available())
-      rx = Serial.read();
+    if(readStatus){
+      while(!Serial.available());
     
-    if(rx == 'O'){
-    tone(BUZZER, 2500);
-    delay(100);
-    noTone(BUZZER);
-    userAuthenticated = true;
-    }
-    else{
-      tone(BUZZER, 1000);
-      delay(50);
-      noTone(BUZZER);
-      delay(30);
-      tone(BUZZER, 1000);
-      delay(50);
-      noTone(BUZZER);
-      readStatus = false;
-    }
-  }
-  
-  while(userAuthenticated){
-    char rx;
-    rx = Serial.read();
-    if(rx == 'X'){
-      digitalWrite(LED, LOW);
-      userAuthenticated = false;
-      readStatus = false;
-    }
-    else{
-      digitalWrite(LED, HIGH);
-      Serial.println(getDistance());
+      char rx;
+    
+      while(Serial.available())
+        rx = Serial.read();
+      
+      if(rx == 'O'){
+      tone(BUZZER, 2500);
       delay(100);
+      noTone(BUZZER);
+      userAuthenticated = true;
+      }
+      else{
+        tone(BUZZER, 1000);
+        delay(50);
+        noTone(BUZZER);
+        delay(30);
+        tone(BUZZER, 1000);
+        delay(50);
+        noTone(BUZZER);
+        readStatus = false;
+      }
+    }
+    
+    while(userAuthenticated){
+      char rx;
+      rx = Serial.read();
+      if(rx == 'X'){
+        digitalWrite(LED, LOW);
+        userAuthenticated = false;
+        readStatus = false;
+        started = 'N';
+      }
+      else{
+        digitalWrite(LED, HIGH);
+        Serial.println(getDistance());
+        delay(100);
+      }
     }
   }
 }

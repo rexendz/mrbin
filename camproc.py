@@ -48,7 +48,7 @@ class Processing(ImageProcessor):
         self.height = 0
         self.cam_started = False
 
-    # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED, 3 - IMAGE&EDGED, 4 - IMAGE&EDGED w/ TRACKS
+    # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED
     def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1500):
         img = np.zeros([240, 320, 3], np.uint8)
         
