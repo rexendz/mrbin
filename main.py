@@ -25,7 +25,7 @@ class Window(QWidget):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.arduino = arduino
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     
     device = "__PI__"
     url = "0.0.0.0"
-    window = 0;  # 0 - Raw image, 1 - Processed image, 2 - Edge masks
+    window = 1;  # 0 - Raw image, 1 - Processed image, 2 - Edge masks
     
     if args.ip is not None:
         device = "__IP__"
