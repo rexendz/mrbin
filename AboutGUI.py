@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+import os
 import sys
 
 
@@ -50,7 +51,8 @@ class About(QDialog):
         self.left = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.userpath = os.getenv("HOME")
+        self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
         self.InitWindow()

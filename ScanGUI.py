@@ -4,6 +4,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from sql import SQLServer
 from AdminGUI import InsertRecords
+import os
 
 
 class Register(InsertRecords):
@@ -80,7 +81,8 @@ class Scan(QDialog):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
+        self.userpath = os.getenv("HOME")
+        self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
 
         self.reader = reader
@@ -154,7 +156,7 @@ class Scan(QDialog):
         lbl2 = QLabel(self)
         lbl2.setAlignment(Qt.AlignHCenter)
 
-        pix1 = QPixmap('/home/pi/mrbin/res/rfid.jpg')
+        pix1 = QPixmap(self.userpath + '/mrbin/res/rfid.jpg')
         pix1 = pix1.scaled(128, 128, QtCore.Qt.KeepAspectRatio)
         lbl2.setPixmap(pix1)
 

@@ -5,6 +5,7 @@ from ScanGUI import Scan, Register
 from LoginGUI import Login
 from CameraGUI import Cam
 from AdminGUI import *
+import os
 import sys
 try:
     from arduino import SerialListener
@@ -25,7 +26,8 @@ class Window(QWidget):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
+        self.userpath = os.getenv("HOME")
+        self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.arduino = arduino
 
@@ -60,7 +62,7 @@ class Window(QWidget):
         btn5 = QPushButton("Exit", self)
 
         if not self.arduino:
-            btn1.setDisable(True)
+            btn1.setDisabled(True)
 
         btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
@@ -136,7 +138,7 @@ class Controller:
             self.reader.pause()
             self.arduino = True
         except serialutil.SerialException:
-            print("No Arduino!")
+            print("No Arduino! MR BIN is in limited function mode.")
             self.arduino = False
 
     def show_window(self, prev_window):
@@ -207,7 +209,10 @@ class Controller:
         self.modify.switch_back.connect(self.show_admin)
 
     def exit(self):
-        self.sql.close()
+        try:
+            self.sql.close()
+        except AttributeError:
+            print("No SQL to be closed")
         if self.arduino:
             self.reader.stop()
         sys.exit()
