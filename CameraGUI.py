@@ -26,10 +26,10 @@ class CameraImage(QObject):
 
         while not self.stopped:
             distance = self.reader.readDistance()
-            if 10 >= distance > 2:
+            if 15 >= distance > 2:
                 if not self.objectDetected:
                     self.objectDetected = True
-            elif distance > 10:
+            elif distance > 15:
                 self.objectDetected = False
 
             if not self.objectDetected:
@@ -62,7 +62,7 @@ class Cam(QDialog):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
         self.gbox = QGridLayout()
         self.vbox = QVBoxLayout()
         self.name = name

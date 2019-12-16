@@ -37,19 +37,24 @@ class ImageProcessor:
 
 class Processing(ImageProcessor):
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
-    def __init__(self, device="__PI__", url="0.0.0.0", ppm=10):
+    def __init__(self, device="__PI__", url="0.0.0.0", ppmX=8.57, ppmY=10):
         self.device = device
         if self.device == "__IP__":
             self.cam = cv2.VideoCapture(url)
+            
         else:
             self.cam = np.zeros([240, 320, 3], np.uint8)
-        self.ppm = ppm
+        self.ppmX = ppmX
+        self.ppmY = ppmY
         self.diameter = 0
         self.height = 0
+        self.volume = 0
+        self.averageVolume = 0
+        self.counter = 0
         self.cam_started = False
 
     # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED
-    def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1500):
+    def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1000):
         img = np.zeros([240, 320, 3], np.uint8)
         
         if self.device == "__PI__":
@@ -70,13 +75,19 @@ class Processing(ImageProcessor):
         edged = self.getEdges(gray, cannyLTH, cannyUTH)
 
         cnts = self.getContours(edged)
-
+        self.volume, self.averageVolume, self.counter = 0, 0, 0
         if len(cnts) > 0:
             for c in cnts:
-                if cv2.contourArea(c) < minarea:
+                if cv2.contourArea(c) < minarea or cv2.contourArea(c) > 30000:
                     continue
 
                 box = self.getRectContour(c)
+                (tl, tr, br, bl) = box
+                if tl[0] < 20 or tr[0] > 300 or br[0] > 300 or bl[0] < 20 or tl[1] < 20 or tr[1] < 20 or br[1] > 260 or bl[1] > 260:
+                    continue
+                print("tl:", tl)
+                print("tr:", tr)
+                print("br:", br)
 
                 if self.device == "__PI__":
                     img = orig.copy()  # Only render box to single object to save memory
@@ -84,8 +95,7 @@ class Processing(ImageProcessor):
                 cv2.drawContours(img, [box.astype("int")], -1, (0, 255, 0), 2)
                 for (x, y) in box:
                     cv2.circle(img, (int(x), int(y)), 2, (0, 0, 255), -1)
-
-                (tl, tr, br, bl) = box
+                print("bl:", bl)
                 (tltrX, tltrY) = self.getMidpoint(tl, tr)
                 (blbrX, blbrY) = self.getMidpoint(bl, br)
                 (tlblX, tlblY) = self.getMidpoint(tl, bl)
@@ -101,15 +111,17 @@ class Processing(ImageProcessor):
             
                 dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
                 dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
-                dimA = dA / self.ppm  # DIAMETER
-                dimB = dB / self.ppm  # HEIGHT
-                if len(cnts) == 1:
-                    self.diameter = dimA
-                    self.height = dimB
+                dimA = dA / self.ppmY  # DIAMETER
+                dimB = dB / self.ppmX  # HEIGHT
+                self.diameter = dimA
+                self.height = dimB
+                self.volume += self.getVolume()
+                self.counter += 1
+                self.averageVolume = self.volume/self.counter
 
-                cv2.putText(img, "{:.1f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
-                cv2.putText(img, "{:.1f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
-
+                cv2.putText(img, "{:.2f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+                cv2.putText(img, "{:.2f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+                cv2.putText(img, "{:.2f}mL".format(self.averageVolume), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
             if window == 0:
                 return orig
             elif window == 1:
