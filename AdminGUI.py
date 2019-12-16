@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from sql import SQLServer
 from pymysql.err import OperationalError
+import os
 import sys
 
 
@@ -91,7 +92,8 @@ class InsertRecords(QDialog):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
+        self.userpath = os.getenv("HOME")
+        self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.gbox = QGridLayout()
 

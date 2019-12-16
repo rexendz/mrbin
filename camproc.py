@@ -1,9 +1,8 @@
 import numpy as np 
 import cv2
-import imutils
 import time
 from scipy.spatial import distance as dist
-from imutils import contours, perspective
+from imutils import perspective
 try:
     from picam import camera
 except ImportError or ImportError:

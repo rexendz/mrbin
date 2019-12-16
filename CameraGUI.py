@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import cv2
 import numpy as np
+import os
 from camproc import Processing
 import sys
 
@@ -33,6 +34,7 @@ class CameraImage(QObject):
                 self.objectDetected = False
 
             if not self.objectDetected:
+                self.changePixmap.emit(None)
                 cam.rest()
 
             elif self.objectDetected:
@@ -62,7 +64,8 @@ class Cam(QDialog):
         self.top = 0
         self.width = 480
         self.height = 320
-        self.icon = QIcon('/home/pi/mrbin/res/favicon.png')
+        self.userpath = os.getenv("HOME")
+        self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.gbox = QGridLayout()
         self.vbox = QVBoxLayout()
         self.name = name
@@ -77,6 +80,7 @@ class Cam(QDialog):
         self.InitWorker()
         self.InitWindow()
         self.InitComponents()
+        self.setImage(None)
 
         self.show()
 
@@ -112,7 +116,10 @@ class Cam(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint)
 
     def setImage(self, image):
-        self.pic.setPixmap(QPixmap.fromImage(image))
+        if image is not None:
+            self.pic.setPixmap(QPixmap.fromImage(image))
+        else:
+            self.pic.setPixmap(QPixmap(self.userpath + '/mrbin/res/instruction.png'))
 
     def InitComponents(self):
         lbl1 = QLabel(("User: " + self.name), self)
@@ -141,5 +148,5 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__IP__", "https://192.168.1.6:8080/video", "amaze", "959")
+    window = Cam("__IP__", "https://192.168.1.6:8080/video", 1, "amaze", "959", None)
     app.exec()
