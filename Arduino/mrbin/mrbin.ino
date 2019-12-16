@@ -1,8 +1,18 @@
+/* TRIG   4
+ * ECHO   5
+ * LED    7
+ * BUZZER 8
+ * RST    9
+ * SDA   10
+ * MOSI  11
+ * MISO  12
+ * SCK   13
+ */
+
 #include <MFRC522.h>
 #define trig 4
 #define echo 5
-#define GREEN_LED 6
-#define RED_LED 7
+#define LED 7
 #define BUZZER 8
 
 MFRC522 rfid(10, 9);
@@ -12,15 +22,14 @@ bool readStatus = false;
 bool userAuthenticated = false;
 
 void setup() {
-  pinMode(RED_LED, OUTPUT);
-  pinMode(GREEN_LED, OUTPUT);
+  pinMode(LED, OUTPUT);
   Serial.begin(9600);
   SPI.begin();
   rfid.PCD_Init();
   for(int i = 0; i < 10; i++)
     Serial.write('\n');
   delay(5);
-  digitalWrite(RED_LED, HIGH);
+  digitalWrite(LED, LOW);
 }
 
 void loop() {
@@ -57,16 +66,12 @@ void loop() {
       rx = Serial.read();
     
     if(rx == 'O'){
-    digitalWrite(GREEN_LED, HIGH);
-    digitalWrite(RED_LED, LOW);
     tone(BUZZER, 2500);
     delay(100);
     noTone(BUZZER);
     userAuthenticated = true;
     }
     else{
-      digitalWrite(RED_LED, LOW);
-      digitalWrite(GREEN_LED, LOW);
       tone(BUZZER, 1000);
       delay(50);
       noTone(BUZZER);
@@ -74,11 +79,12 @@ void loop() {
       tone(BUZZER, 1000);
       delay(50);
       noTone(BUZZER);
-      digitalWrite(RED_LED, HIGH);
       readStatus = false;
     }
   }
+  
   while(userAuthenticated){
+    digitalWrite(LED, HIGH);
     Serial.println(getDistance());
     delay(100);
   }
