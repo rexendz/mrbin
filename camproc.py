@@ -74,7 +74,6 @@ class Processing(ImageProcessor):
         edged = self.getEdges(gray, cannyLTH, cannyUTH)
 
         cnts = self.getContours(edged)
-        self.volume, self.averageVolume, self.counter = 0, 0, 0
         if len(cnts) > 0:
             for c in cnts:
                 if cv2.contourArea(c) < minarea or cv2.contourArea(c) > 30000:
@@ -135,18 +134,13 @@ class Processing(ImageProcessor):
         elif self.device == "__IP__":
             self.cam.release()
 
-        cv2.destroyAllWindows()
 
     def getVolume(self):
         volume = np.pi * (self.diameter / 2) * (self.diameter / 2) * self.height
         return volume
 
     def rest(self):
+        self.volume, self.averageVolume, self.counter = 0, 0, 0
         if self.device == "__PI__":
             if self.cam_started:
                 self.cam.pause()
-
-        self.window_started = False
-        cv2.destroyAllWindows()
-
-
