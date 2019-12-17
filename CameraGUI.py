@@ -11,7 +11,8 @@ import sys
 class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
-
+    noChange = pyqtSignal()
+    
     def __init__(self, device, url, image, reader, parent=None):
         super().__init__(parent)
         self.device = device
@@ -20,6 +21,7 @@ class CameraImage(QObject):
         self.image = image
         self.stopped = False
         self.objectDetected = False
+        self.change = True
 
     def do_work(self):
         self.reader.resume()
@@ -34,8 +36,10 @@ class CameraImage(QObject):
                 self.objectDetected = False
 
             if not self.objectDetected:
-                self.changePixmap.emit(None)
                 cam.rest()
+                if self.change == True:
+                    self.noChange.emit()
+                    self.change = False
 
             elif self.objectDetected:
                 frame = cam.getProcessedImage(self.image)
@@ -45,6 +49,7 @@ class CameraImage(QObject):
                 convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
                 p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
+                self.change = True
 
         self.reader.write('X')
         self.reader.pause()
@@ -90,8 +95,9 @@ class Cam(QDialog):
 
         self.worker.moveToThread(self.thread)
 
-        self.worker.changePixmap.connect(self.setImage)
-
+        self.worker.changePixmap.connect(self.setImage)        
+        self.worker.noChange.connect(self.setImage)
+        
         self.worker.finished.connect(self.thread.quit)  # connect the workers finished signal to stop thread
         self.worker.finished.connect(self.worker.deleteLater)  # connect the workers finished signal to clean up worker
         self.thread.finished.connect(self.thread.deleteLater)  # connect threads finished signal to clean up thread
@@ -115,7 +121,7 @@ class Cam(QDialog):
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
-    def setImage(self, image):
+    def setImage(self, image=None):
         if image is not None:
             self.pic.setPixmap(QPixmap.fromImage(image))
         else:
