@@ -19,16 +19,17 @@ class camera:
         return self
 
     def update(self):
-        if not self.paused:
-            for f in self.stream:
-                self.frame = f.array
-                self.rawCapture.truncate(0)
-                if self.stopped:
-                    self.stream.close()
-                    self.rawCapture.close()
-                    self.cam.close()
-                    print("Camera Thread Stopped")
-                    return  
+        for f in self.stream:
+            while self.paused:
+                pass
+            self.frame = f.array
+            self.rawCapture.truncate(0)
+            if self.stopped:
+                self.stream.close()
+                self.rawCapture.close()
+                self.cam.close()
+                print("Camera Thread Stopped")
+                return  
 
     def read(self):
         return self.frame
