@@ -128,8 +128,8 @@ class Processing(ImageProcessor):
         return np.zeros([240, 320, 3], np.uint8)
 
     def release(self):
-        self.cam.resume()
         if self.device == "__PI__":
+            self.cam.resume()
             self.cam.close()
         elif self.device == "__IP__":
             self.cam.release()

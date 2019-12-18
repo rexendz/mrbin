@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import cv2
-import numpy as np
 import os
 from camproc import Processing
 import sys
@@ -25,27 +24,31 @@ class CameraImage(QObject):
         self.change = True
 
     def do_work(self):
-        self.reader.resume()
+        if self.reader is not None:
+            self.reader.resume()
         cam = Processing(self.device, self.url)
 
         while not self.stopped:
-            distance = self.reader.readDistance()
-            if 15 >= distance > 2:
-                if not self.objectDetected:
-                    self.objectDetected = True
-            elif distance > 15:
-                self.objectDetected = False
+            if self.reader is not None:
+                distance = self.reader.readDistance()
+                if 15 >= distance > 2:
+                    if not self.objectDetected:
+                        self.objectDetected = True
+                elif distance > 15:
+                    self.objectDetected = False
+
+            else:
+                self.objectDetected = True
 
             if not self.objectDetected:
                 cam.rest()
-                if self.change == True:
+                if self.change:
                     self.noChange.emit()
                     self.change = False
 
             elif self.objectDetected:
-                if self.change == False:
+                if not self.change:
                     QThread.sleep(1)
-                    print("SLEEPING")
                 frame = cam.getProcessedImage(self.image)
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
@@ -55,11 +58,12 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if cam.counter > 500:
-                    self.gotVolume.emit(cam.getVolume())    
+                    self.gotVolume.emit(cam.getAverageVolume())
                     self.stop()
-                    
-        self.reader.write('X')
-        self.reader.pause()
+
+        if self.reader is not None:
+            self.reader.write('X')
+            self.reader.pause()
         cam.release()
         self.finished.emit()
 
@@ -69,6 +73,7 @@ class CameraImage(QObject):
 
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
+    switch_result = pyqtSignal(str, int, float)
 
     def __init__(self, device, url, image, name, pts, reader):
         super().__init__()
@@ -134,7 +139,7 @@ class Cam(QDialog):
         msg = QMessageBox()
         msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
         msg.information(self, "Measurement Success", "Average Measured Volume: {:.2f}mL".format(vol))
-        self.switch_back.emit(self)
+        self.switch_result.emit(self.name, self.pts, vol)
 
     def setImage(self, image=None):
         if image is not None:

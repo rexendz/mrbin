@@ -5,6 +5,7 @@ from ScanGUI import Scan, Register
 from LoginGUI import Login
 from CameraGUI import Cam
 from AdminGUI import *
+from ResultGUI import Result
 import os
 import sys
 try:
@@ -127,6 +128,7 @@ class Controller:
         self.register = None
         self.delete = None
         self.modify = None
+        self.result = None
 
         try:
             self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
@@ -177,6 +179,11 @@ class Controller:
         self.scan.hide()
         self.cam = Cam(self.device, self.url, self.image, name, pts, self.reader)
         self.cam.switch_back.connect(self.show_window)
+
+    def show_result(self, name, pts, vol):
+        self.cam.hide()
+        self.result = Result(name, pts, vol)
+        self.result.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):
         if prev_window is not None:

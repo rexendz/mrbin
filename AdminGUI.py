@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from sql import SQLServer
 from pymysql.err import OperationalError
 import os
 import sys
