@@ -12,6 +12,7 @@ class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
     noChange = pyqtSignal()
+    gotVolume = pyqtSignal(float)
     
     def __init__(self, device, url, image, reader, parent=None):
         super().__init__(parent)
@@ -42,6 +43,9 @@ class CameraImage(QObject):
                     self.change = False
 
             elif self.objectDetected:
+                if self.change == False:
+                    QThread.sleep(1)
+                    print("SLEEPING")
                 frame = cam.getProcessedImage(self.image)
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
@@ -50,9 +54,13 @@ class CameraImage(QObject):
                 p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
                 self.change = True
-
+                if cam.counter > 500:
+                    self.gotVolume.emit(cam.getVolume())    
+                    self.stop()
+                    
         self.reader.write('X')
         self.reader.pause()
+        cam.release()
         self.finished.emit()
 
     def stop(self):
@@ -97,6 +105,7 @@ class Cam(QDialog):
 
         self.worker.changePixmap.connect(self.setImage)        
         self.worker.noChange.connect(self.setImage)
+        self.worker.gotVolume.connect(self.printVolume)
         
         self.worker.finished.connect(self.thread.quit)  # connect the workers finished signal to stop thread
         self.worker.finished.connect(self.worker.deleteLater)  # connect the workers finished signal to clean up worker
@@ -120,6 +129,12 @@ class Cam(QDialog):
         self.setWindowIcon(self.icon)
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
+
+    def printVolume(self, vol):
+        msg = QMessageBox()
+        msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
+        msg.information(self, "Measurement Success", "Average Measured Volume: {:.2f}mL".format(vol))
+        self.switch_back.emit(self)
 
     def setImage(self, image=None):
         if image is not None:

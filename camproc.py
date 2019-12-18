@@ -63,7 +63,7 @@ class Processing(ImageProcessor):
                 time.sleep(1)
                 print("Pi Camera Started!")
                 self.cam_started = True
-        
+            self.cam.resume()
             img = self.cam.read()
             
         elif self.device == "__IP__":
@@ -81,11 +81,12 @@ class Processing(ImageProcessor):
 
                 box = self.getRectContour(c)
                 (tl, tr, br, bl) = box
-                if tl[0] < 20 or tr[0] > 300 or br[0] > 300 or bl[0] < 20 or tl[1] < 20 or tr[1] < 20 or br[1] > 260 or bl[1] > 260:
+                if tl[0] < 5 or tr[0] > 315 or br[0] > 315 or bl[0] < 5 or tl[1] < 5 or tr[1] < 5 or br[1] > 275 or bl[1] > 275:
                     continue
-                print("tl:", tl)
-                print("tr:", tr)
-                print("br:", br)
+                #print("tl:", tl)
+                #print("tr:", tr)
+                #print("br:", br)
+                #print("bl:", bl)
 
                 if self.device == "__PI__":
                     img = orig.copy()  # Only render box to single object to save memory
@@ -93,7 +94,6 @@ class Processing(ImageProcessor):
                 cv2.drawContours(img, [box.astype("int")], -1, (0, 255, 0), 2)
                 for (x, y) in box:
                     cv2.circle(img, (int(x), int(y)), 2, (0, 0, 255), -1)
-                print("bl:", bl)
                 (tltrX, tltrY) = self.getMidpoint(tl, tr)
                 (blbrX, blbrY) = self.getMidpoint(bl, br)
                 (tlblX, tlblY) = self.getMidpoint(tl, bl)
@@ -116,7 +116,6 @@ class Processing(ImageProcessor):
                 self.volume += self.getVolume()
                 self.counter += 1
                 self.averageVolume = self.volume/self.counter
-
                 cv2.putText(img, "{:.2f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.2f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.2f}mL".format(self.averageVolume), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
@@ -129,6 +128,7 @@ class Processing(ImageProcessor):
         return np.zeros([240, 320, 3], np.uint8)
 
     def release(self):
+        self.cam.resume()
         if self.device == "__PI__":
             self.cam.close()
         elif self.device == "__IP__":
@@ -138,6 +138,9 @@ class Processing(ImageProcessor):
     def getVolume(self):
         volume = np.pi * (self.diameter / 2) * (self.diameter / 2) * self.height
         return volume
+
+    def getAverageVolume(self):
+        return self.averageVolume
 
     def rest(self):
         self.volume, self.averageVolume, self.counter = 0, 0, 0
