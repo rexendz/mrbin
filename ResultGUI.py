@@ -10,7 +10,7 @@ from AdminGUI import InsertRecords
 class Result(QDialog):
     switch_back = pyqtSignal(QDialog)
 
-    def __init__(self, name, pts, vol):
+    def __init__(self, name, pts, vol, height, diameter):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -21,8 +21,8 @@ class Result(QDialog):
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.gbox = QGridLayout()
-        self.bottleH = 17
-        self.bottleD = 5
+        self.bottleH = height
+        self.bottleD = diameter
         self.bottleV = vol
         self.name = name
         self.genInc = 1

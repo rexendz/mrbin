@@ -11,7 +11,7 @@ class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
     noChange = pyqtSignal()
-    gotVolume = pyqtSignal(float)
+    gotVolume = pyqtSignal((float, float, float))
     
     def __init__(self, device, url, image, reader, parent=None):
         super().__init__(parent)
@@ -58,7 +58,7 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if cam.counter > 500:
-                    self.gotVolume.emit(cam.getAverageVolume())
+                    self.gotVolume.emit(cam.getResults())
                     self.stop()
 
         if self.reader is not None:
@@ -135,11 +135,11 @@ class Cam(QDialog):
         self.setLayout(self.vbox)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
-    def printVolume(self, vol):
+    def printVolume(self, vol, height, diameter):
         msg = QMessageBox()
         msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
         msg.information(self, "Measurement Success", "Average Measured Volume: {:.2f}mL".format(vol))
-        self.switch_result.emit(self.name, self.pts, vol)
+        self.switch_result.emit(self.name, self.pts, vol, height, diameter)
 
     def setImage(self, image=None):
         if image is not None:

@@ -182,9 +182,9 @@ class Controller:
         self.cam.switch_back.connect(self.show_window)
         self.cam.switch_result.connect(self.show_result)
 
-    def show_result(self, name, pts, vol):
+    def show_result(self, name, pts, vol, height, diameter):
         self.cam.hide()
-        self.result = Result(name, pts, vol)
+        self.result = Result(name, pts, vol, height, diameter)
         self.result.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):

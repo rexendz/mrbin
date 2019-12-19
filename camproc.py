@@ -48,6 +48,8 @@ class Processing(ImageProcessor):
         self.diameter = 0
         self.height = 0
         self.volume = 0
+        self.averageDiameter = 0
+        self.averageHeight = 0
         self.averageVolume = 0
         self.counter = 0
         self.cam_started = False
@@ -115,6 +117,8 @@ class Processing(ImageProcessor):
                 self.height = dimB
                 self.volume += self.getVolume()
                 self.counter += 1
+                self.averageDiameter = self.diameter/self.counter
+                self.averageHeight = self.height/self.counter
                 self.averageVolume = self.volume/self.counter
                 cv2.putText(img, "{:.2f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.2f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
@@ -139,8 +143,8 @@ class Processing(ImageProcessor):
         volume = np.pi * (self.diameter / 2) * (self.diameter / 2) * self.height
         return volume
 
-    def getAverageVolume(self):
-        return self.averageVolume
+    def getResults(self):
+        return self.averageVolume, self.averageHeight, self.averageDiameter
 
     def rest(self):
         self.volume, self.averageVolume, self.counter = 0, 0, 0
