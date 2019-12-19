@@ -24,8 +24,8 @@ class Register(InsertRecords):
 
 class Worker(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
-    auth = pyqtSignal(str, int)
-    register = pyqtSignal(str, SQLServer)
+    auth = pyqtSignal(int, str, int)
+    register = pyqtSignal(str)
 
     def __init__(self, reader, parent=None):
         QObject.__init__(self, parent=parent)
@@ -33,6 +33,7 @@ class Worker(QObject):
         self.continue_run = True
         self.sql = SQLServer()
         self.reader = reader
+        self.id = None
         self.name = None
         self.pts = None
 
@@ -47,17 +48,18 @@ class Worker(QObject):
             try:
                 user = self.sql.findUid(int(uid, 16))
                 if len(user) > 0:
-                    (_, name, _, pts), = user
+                    (id, name, _, pts), = user
+                    self.id = id
                     self.name = name
                     self.pts = pts
                     self.reader.write('O')
                     self.userAuthenticated = True
                     self.continue_run = False
-                    self.auth.emit(self.name, self.pts)
+                    self.auth.emit(self.id, self.name, self.pts)
                     self.reader.pause()
                 else:
                     self.reader.write('X')
-                    self.register.emit(uid, self.sql)
+                    self.register.emit(uid)
             except ValueError:
                 print("No Result")
             QThread.sleep(1)
@@ -114,12 +116,12 @@ class Scan(QDialog):
 
         self.thread.start()
 
-    def authenticated(self, name, pts):
+    def authenticated(self, id, name, pts):
         self.stop_signal.emit()
         msg = QMessageBox(self)
         msg.information(self,
                         "Success!", "Welcome, {}\nYour current incentive points is: {}".format(name, pts))
-        self.switch_cam.emit(name, pts)
+        self.switch_cam.emit(id, name, pts)
 
     def register(self, uid):
         ret = QMessageBox.question(self,

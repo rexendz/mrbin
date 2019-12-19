@@ -75,8 +75,18 @@ class SQLServer:
         self.execute()
         return self.curr.fetchall()
 
-    def modifyRecord(self, id, name, rfid, pts, table="Users"):
+    def modifyRecordByID(self, id, name, rfid, pts, table="Users"):
         self.query = "UPDATE {} SET Name = '{}', RFID_UID = {}, Incentives = {} WHERE id = {};".format(table, name, rfid, pts, id)
+        self.execute()
+        self.commit()
+
+    def modifyRecordByName(self, name, rfid, pts, table="Users"):
+        self.query = "UPDATE {} SET Name = '{}', RFID_UID = {}, Incentives = {} WHERE Name = {};".format(table, name, rfid, pts, name)
+        self.execute()
+        self.commit()
+
+    def updateIncentives(self, id, pts, table="Users"):
+        self.query = "UPDATE {} SET Incentives = {} WHERE id = {};".format(table, pts, id)
         self.execute()
         self.commit()
 

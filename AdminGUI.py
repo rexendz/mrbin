@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from pymysql.err import OperationalError
+from sql import SQLServer
 import os
 import sys
 
@@ -307,7 +308,7 @@ class ModifyRecords(ViewRecords):
                                                                 "updated.")
         else:
             for i in range(len(self.users)):
-                self.sql.modifyRecord(self.id[i], name[i], int(rfid[i], 16), int(pts[i]))
+                self.sql.modifyRecordByID(self.id[i], name[i], int(rfid[i], 16), int(pts[i]))
 
             QMessageBox.information(self, "Records Updated", "{} record/s updated!".format(len(changes)))
 
@@ -407,5 +408,6 @@ class Admin(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Admin()
+    sql = SQLServer()
+    window = Admin(sql)
     app.exec()

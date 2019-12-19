@@ -4,19 +4,19 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import os
 from sql import SQLServer
-from AdminGUI import InsertRecords
 
 
 class Result(QDialog):
     switch_back = pyqtSignal(QDialog)
 
-    def __init__(self, name, pts, vol, height, diameter):
+    def __init__(self, sql, ident, name, pts, vol, height, diameter):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
         self.width = 480
         self.height = 320
+        self.sql = sql
         self.userpath = os.getenv("HOME")
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
@@ -24,9 +24,11 @@ class Result(QDialog):
         self.bottleH = height
         self.bottleD = diameter
         self.bottleV = vol
+        self.id = ident
         self.name = name
         self.genInc = 0
         self.curInc = pts
+        self.newInc = 0
         self.CalculateIncentives()
         self.InitWindow()
         self.InitComponents()
@@ -40,6 +42,8 @@ class Result(QDialog):
             self.genInc = 2
         elif 950 <= self.bottleV <= 1450:
             self.genInc = 3
+        self.newInc = self.curInc + self.genInc
+        self.sql.updateIncentives(self.id, self.newInc)
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
@@ -104,6 +108,7 @@ class Result(QDialog):
 
 if __name__ == "__main__":
     app = QApplication([])
-    window = Result("amaze", 952, 343.12)
+    sql = SQLServer()
+    window = Result(sql, 1, "Rex", 1337, 343.12, 17, 5)
     app.exec()
 
