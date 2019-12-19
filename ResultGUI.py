@@ -27,6 +27,7 @@ class Result(QDialog):
         self.name = name
         self.genInc = 0
         self.curInc = pts
+        self.CalculateIncentives()
         self.InitWindow()
         self.InitComponents()
 
@@ -37,7 +38,7 @@ class Result(QDialog):
             self.genInc = 1
         elif 450 <= self.bottleV <= 950:
             self.genInc = 2
-        elif 950 <= self.bottleV <= 1450
+        elif 950 <= self.bottleV <= 1450:
             self.genInc = 3
 
     def InitWindow(self):
