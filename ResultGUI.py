@@ -25,12 +25,20 @@ class Result(QDialog):
         self.bottleD = diameter
         self.bottleV = vol
         self.name = name
-        self.genInc = 1
+        self.genInc = 0
         self.curInc = pts
         self.InitWindow()
         self.InitComponents()
 
         self.show()
+
+    def CalculateIncentives(self):
+        if self.bottleV < 450:
+            self.genInc = 1
+        elif 450 <= self.bottleV <= 950:
+            self.genInc = 2
+        elif 950 <= self.bottleV <= 1450
+            self.genInc = 3
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
