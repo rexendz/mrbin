@@ -1,4 +1,5 @@
 from serial import serialutil
+from sql import SQLServer
 import argparse
 from AboutGUI import About
 from ScanGUI import Scan, Register
@@ -179,6 +180,7 @@ class Controller:
         self.scan.hide()
         self.cam = Cam(self.device, self.url, self.image, name, pts, self.reader)
         self.cam.switch_back.connect(self.show_window)
+        self.cam.switch_result.connect(self.show_result)
 
     def show_result(self, name, pts, vol):
         self.cam.hide()

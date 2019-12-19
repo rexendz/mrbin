@@ -56,17 +56,17 @@ class Result(QDialog):
         lbl3 = QLabel("Bottle Diameter: {}".format(self.bottleD))
         lbl4 = QLabel("Bottle Volume: {}".format(self.bottleV))
 
-        lbl2.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
-        lbl3.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
-        lbl4.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
+        lbl2.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
+        lbl3.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
+        lbl4.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
 
         lbl5 = QLabel("Current Incentive Points: {}".format(self.curInc))
         lbl6 = QLabel("Generated Incentive Points: {}".format(self.genInc))
         lbl7 = QLabel("New Incentive Points: {}".format(self.curInc + self.genInc))
 
-        lbl6.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
-        lbl7.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
-        lbl5.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
+        lbl6.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
+        lbl7.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
+        lbl5.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
 
         lbl8 = QLabel("Thank you, {}!".format(self.name))
         lbl8.setAlignment(Qt.AlignHCenter)
