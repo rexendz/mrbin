@@ -11,7 +11,7 @@ class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
     noChange = pyqtSignal()
-    gotVolume = pyqtSignal((float, float, float))
+    gotVolume = pyqtSignal(float, float, float)
     
     def __init__(self, device, url, image, reader, parent=None):
         super().__init__(parent)
@@ -58,7 +58,7 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if cam.counter > 500:
-                    self.gotVolume.emit(cam.getResults())
+                    self.gotVolume.emit(cam.getAveVol(), cam.getAveHei(), cam.getAveDia())
                     self.stop()
 
         if self.reader is not None:
@@ -73,7 +73,7 @@ class CameraImage(QObject):
 
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
-    switch_result = pyqtSignal(str, int, float)
+    switch_result = pyqtSignal(str, int, float, float, float)
 
     def __init__(self, device, url, image, name, pts, reader):
         super().__init__()
