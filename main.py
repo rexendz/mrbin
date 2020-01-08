@@ -63,16 +63,14 @@ class Window(QWidget):
         btn4 = QPushButton("About", self)
         btn5 = QPushButton("Exit", self)
 
+        if not self.arduino:
+            btn1.setDisabled(True)
+
         btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn3.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn4.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn5.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
-
-        if not self.arduino:
-            btn1.setDisabled(True)
-            btn1.setStyleSheet("background-color : red; color : #1b2f33; font : 20px; font-family : Sanserif;")
-            btn1.setText("(Disabled, check Arduino connection)")
 
         btn1.clicked.connect(self.btn1Action)
         btn2.clicked.connect(self.btn2Action)
@@ -178,15 +176,15 @@ class Controller:
         self.about = About()
         self.about.switch_back.connect(self.show_window)
 
-    def show_cam(self, id, name, pts):
+    def show_cam(self, userID, name, pts):
         self.scan.hide()
-        self.cam = Cam(self.device, self.url, self.image, id, name, pts, self.reader)
+        self.cam = Cam(self.device, self.url, self.image, userID, name, pts, self.reader)
         self.cam.switch_back.connect(self.show_window)
         self.cam.switch_result.connect(self.show_result)
 
-    def show_result(self, id, name, pts, vol, height, diameter):
+    def show_result(self, userID, name, pts, vol, height, diameter):
         self.cam.hide()
-        self.result = Result(self.sql, id, name, pts, vol, height, diameter)
+        self.result = Result(userID, name, pts, vol, height, diameter)
         self.result.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):

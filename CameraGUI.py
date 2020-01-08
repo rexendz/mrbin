@@ -73,9 +73,9 @@ class CameraImage(QObject):
 
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
-    switch_result = pyqtSignal(str, int, float, float, float)
+    switch_result = pyqtSignal(int, str, int, float, float, float)
 
-    def __init__(self, device, url, image, ident, name, pts, reader):
+    def __init__(self, device, url, image, userID, name, pts, reader):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -86,7 +86,7 @@ class Cam(QDialog):
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.gbox = QGridLayout()
         self.vbox = QVBoxLayout()
-        self.id = ident
+        self.userID = userID
         self.name = name
         self.pts = pts
         self.image = image
@@ -140,7 +140,7 @@ class Cam(QDialog):
         msg = QMessageBox()
         msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
         msg.information(self, "Measurement Success", "Average Measured Volume: {:.2f}mL".format(vol))
-        self.switch_result.emit(self.id, self.name, self.pts, vol, height, diameter)
+        self.switch_result.emit(self.userID, self.name, self.pts, vol, height, diameter)
 
     def setImage(self, image=None):
         if image is not None:
