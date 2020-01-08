@@ -30,11 +30,12 @@ class CameraImage(QObject):
 
         while not self.stopped:
             if self.reader is not None:
-                distance = self.reader.readDistance()
-                if 15 >= distance > 2:
+                distance = 'X'
+                distance = self.reader.read()
+                if distance == 'O':
                     if not self.objectDetected:
                         self.objectDetected = True
-                elif distance > 15:
+                else:
                     self.objectDetected = False
 
             else:

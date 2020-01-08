@@ -10,12 +10,17 @@
  */
 
 #include <MFRC522.h>
-#define trig 4
-#define echo 5
 #define LED 7
 #define BUZZER 8
 
 MFRC522 rfid(10, 9);
+
+const int t1 = 4;
+const int e1 = 5;
+const int t2 = A0;
+const int e2 = A1;
+const int t3 = A2;
+const int e3 = A3;
 
 unsigned long timer = 0;
 bool readStatus = false;
@@ -97,15 +102,35 @@ void loop() {
       }
       else{
         digitalWrite(LED, HIGH);
-        Serial.println(getDistance());
+        double dist1 = getDistance(1);
+        double dist2 = getDistance(2);
+        double dist3 = getDistance(3);
+        if((dist1 > 2 && dist1 <= 15) || (dist2 > 2 && dist2 <= 30) || (dist3 >2 && dist3 <= 30))
+          Serial.println('O');
         delay(100);
       }
     }
   }
 }
 
-double getDistance(){
+double getDistance(int sensor){
   float duration;
+  int trig;
+  int echo;
+  switch(sensor){
+    case 1:
+    trig = t1;
+    echo = e1;
+    break;
+    case 2:
+    trig = t2;
+    echo = e2;
+    break;
+    case 3:
+    trig = t3;
+    echo = e3;
+    break;
+  }
   
   pinMode(trig, OUTPUT);
   digitalWrite(trig, LOW);
