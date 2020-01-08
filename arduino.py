@@ -56,13 +56,13 @@ class SerialListener:
     def SerialAvailable(self):
         return self.ser.inWaiting()
 
-    def readDistance(self):
+    def readDistance(self):  # Deprecated as distance is now read within Arduino
         try:
             return float(self.stream)
         except:
             return -1  # Returns -1 if there is an error in reading
 
-    def readRFID(self):
+    def read(self):
         return self.stream
 
     def write(self, msg):

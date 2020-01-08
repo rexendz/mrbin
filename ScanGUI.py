@@ -43,7 +43,7 @@ class Worker(QObject):
             self.reader.resume()
             uid = ''
             while uid is '' and self.continue_run:
-                uid = self.reader.readRFID()
+                uid = self.reader.read()
             QThread.msleep(1)
             try:
                 user = self.sql.findUid(int(uid, 16))
