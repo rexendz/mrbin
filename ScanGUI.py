@@ -25,7 +25,7 @@ class Register(InsertRecords):
 class Worker(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     auth = pyqtSignal(int, str, int)
-    register = pyqtSignal(str)
+    register = pyqtSignal(str, SQLServer)
 
     def __init__(self, reader, parent=None):
         QObject.__init__(self, parent=parent)
@@ -33,7 +33,7 @@ class Worker(QObject):
         self.continue_run = True
         self.sql = SQLServer()
         self.reader = reader
-        self.id = None
+        self.userID = None
         self.name = None
         self.pts = None
 
@@ -48,18 +48,18 @@ class Worker(QObject):
             try:
                 user = self.sql.findUid(int(uid, 16))
                 if len(user) > 0:
-                    (id, name, _, pts), = user
-                    self.id = id
+                    (userID, name, rfid, pts), = user
+                    self.userID = userID
                     self.name = name
                     self.pts = pts
                     self.reader.write('O')
                     self.userAuthenticated = True
                     self.continue_run = False
-                    self.auth.emit(self.id, self.name, self.pts)
+                    self.auth.emit(self.userID, self.name, self.pts)
                     self.reader.pause()
                 else:
                     self.reader.write('X')
-                    self.register.emit(uid)
+                    self.register.emit(uid, self.sql)
             except ValueError:
                 print("No Result")
             QThread.sleep(1)
@@ -72,7 +72,7 @@ class Worker(QObject):
 
 class Scan(QDialog):
     stop_signal = pyqtSignal()
-    switch_cam = pyqtSignal(str, int)
+    switch_cam = pyqtSignal(int, str, int)
     switch_back = pyqtSignal(QDialog)
     switch_register = pyqtSignal(str)
 
@@ -116,12 +116,12 @@ class Scan(QDialog):
 
         self.thread.start()
 
-    def authenticated(self, id, name, pts):
+    def authenticated(self, userID, name, pts):
         self.stop_signal.emit()
         msg = QMessageBox(self)
         msg.information(self,
                         "Success!", "Welcome, {}\nYour current incentive points is: {}".format(name, pts))
-        self.switch_cam.emit(id, name, pts)
+        self.switch_cam.emit(userID, name, pts)
 
     def register(self, uid):
         ret = QMessageBox.question(self,
