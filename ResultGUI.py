@@ -10,7 +10,7 @@ from AdminGUI import InsertRecords
 class Result(QDialog):
     switch_back = pyqtSignal(QDialog)
 
-    def __init__(self, userID, name, pts, vol, height, diameter):
+    def __init__(self, userID, name, pts, vol, height, diameter, sql):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -26,11 +26,14 @@ class Result(QDialog):
         self.bottleV = vol
         self.userID = userID
         self.name = name
+        self.sql = sql
         self.genInc = 0
         self.curInc = pts
+        self.newInc = 0
         self.CalculateIncentives()
         self.InitWindow()
         self.InitComponents()
+        self.UpdateRecord()
 
         self.show()
 
@@ -41,6 +44,10 @@ class Result(QDialog):
             self.genInc = 2
         elif 950 <= self.bottleV <= 1450:
             self.genInc = 3
+        self.newInc = self.curInc + self.genInc
+
+    def UpdateRecord(self):
+        self.sql.updateIncentives(self.userID, self.newInc)
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
@@ -72,7 +79,7 @@ class Result(QDialog):
 
         lbl5 = QLabel("Current Incentive Points: {}".format(self.curInc))
         lbl6 = QLabel("Incurred Incentive Points: {}".format(self.genInc))
-        lbl7 = QLabel("New Incentive Points: {}".format(self.curInc + self.genInc))
+        lbl7 = QLabel("New Incentive Points: {}".format(self.newInc))
 
         lbl6.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
         lbl7.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
@@ -104,7 +111,8 @@ class Result(QDialog):
 
 
 if __name__ == "__main__":
+    sql = SQLServer()
     app = QApplication([])
-    window = Result("amaze", 952, 343.12)
+    window = Result(1, "John", 1, 343.12, 17, 15, sql)
     app.exec()
 
