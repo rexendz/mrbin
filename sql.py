@@ -89,6 +89,7 @@ class SQLServer:
         self.query = "UPDATE {} SET Incentives = {} WHERE id = {};".format(table, pts, id)
         self.execute()
         self.commit()
+        print("Updated")
 
     def uidIsExisting(self, uid):
         return len(self.findUid(uid))

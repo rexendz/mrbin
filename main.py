@@ -184,7 +184,7 @@ class Controller:
 
     def show_result(self, userID, name, pts, vol, height, diameter):
         self.cam.hide()
-        self.result = Result(userID, name, pts, vol, height, diameter)
+        self.result = Result(userID, name, pts, vol, height, diameter, self.sql)
         self.result.switch_back.connect(self.show_window)
 
     def show_admin(self, prev_window=None):
