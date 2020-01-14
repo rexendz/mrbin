@@ -1,5 +1,6 @@
-/* TRIG   4
- * ECHO   5
+/* TRIG1  4
+ * ECHO1  5
+ * SERVO  6
  * LED    7
  * BUZZER 8
  * RST    9
@@ -7,12 +8,18 @@
  * MOSI  11
  * MISO  12
  * SCK   13
+ * TRIG2 A0
+ * ECHO2 A1
+ * TRIG3 A2
+ * ECHO3 A3
  */
 
 #include <MFRC522.h>
+#include <Servo.h>
 #define LED 7
 #define BUZZER 8
 
+Servo servo;
 MFRC522 rfid(10, 9);
 
 const int t1 = 4;
@@ -30,12 +37,14 @@ char started;
 void setup() {
   pinMode(LED, OUTPUT);
   Serial.begin(9600);
+  servo.attach(6);
   SPI.begin();
   rfid.PCD_Init();
   for(int i = 0; i < 10; i++)
     Serial.write('\n');
   delay(5);
   digitalWrite(LED, LOW);
+  servo.write(50);
 }
 
 void loop() {
@@ -99,6 +108,17 @@ void loop() {
         userAuthenticated = false;
         readStatus = false;
         started = 'N';
+      }
+      else if(rx == 'S'){
+        for(int i = 50; i <= 120; i++){
+          servo.write(i);
+          delay(10);
+        }
+        delay(2000);
+        for(int i = 120; i >= 50; i--){
+          servo.write(i);
+          delay(10);
+        }
       }
       else{
         digitalWrite(LED, HIGH);
