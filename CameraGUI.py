@@ -30,7 +30,6 @@ class CameraImage(QObject):
 
         while not self.stopped:
             if self.reader is not None:
-                distance = 'X'
                 distance = self.reader.read()
                 if distance == 'O':
                     if not self.objectDetected:
@@ -59,6 +58,7 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if cam.counter > 500:
+                    self.reader.write('S')
                     self.gotVolume.emit(cam.getAveVol(), cam.getAveHei(), cam.getAveDia())
                     self.stop()
 
