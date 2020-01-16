@@ -90,7 +90,6 @@ class CameraImage(QObject):
                             self.phase = 2
                             self.proc = Processing(self.device, cam=self.cam)
                         else:
-                            print("STOPPPPP")
                             self.notBottle.emit()
                             self.stop()
 
@@ -152,6 +151,7 @@ class Cam(QDialog):
         self.worker.changePixmap.connect(self.setImage)        
         self.worker.noChange.connect(self.setImage)
         self.worker.gotVolume.connect(self.printVolume)
+        self.worker.notBottle.connect(self.NotABottle)
         
         self.worker.finished.connect(self.thread.quit)  # connect the workers finished signal to stop thread
         self.worker.finished.connect(self.worker.deleteLater)  # connect the workers finished signal to clean up worker
@@ -187,6 +187,11 @@ class Cam(QDialog):
             self.pic.setPixmap(QPixmap.fromImage(image))
         else:
             self.pic.setPixmap(QPixmap(self.userpath + '/mrbin/res/instruction.png'))
+
+    def NotABottle(self):
+        QMessageBox.information(self, "Result", "Object is NOT a bottle, please try again")
+        self.worker.stop()
+        self.switch_back(self)
 
     def InitComponents(self):
         lbl1 = QLabel(("User: " + self.name), self)
