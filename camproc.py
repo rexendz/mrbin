@@ -1,12 +1,9 @@
-import numpy as np 
+import imutils
+import numpy as np
 import cv2
 import time
 from scipy.spatial import distance as dist
 from imutils import perspective
-try:
-    from picam import camera
-except ImportError or ImportError:
-    print("Failed importing picam.py **THIS IS NORMAL IF RUNNING ON NON-RASPBIAN**")
 
 
 class ImageProcessor:
@@ -34,15 +31,12 @@ class ImageProcessor:
         box = perspective.order_points(box)  # Order pts tl, tr, br, bl
         return box
 
+
 class Processing(ImageProcessor):
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
-    def __init__(self, device="__PI__", url="0.0.0.0", ppmX=8.57, ppmY=10):
+    def __init__(self, device="__PI__", cam=None, ppmX=8.57, ppmY=10):
         self.device = device
-        if self.device == "__IP__":
-            self.cam = cv2.VideoCapture(url)
-            
-        else:
-            self.cam = np.zeros([240, 320, 3], np.uint8)
+        self.cam = cam
         self.ppmX = ppmX
         self.ppmY = ppmY
         self.diameter = 0
@@ -50,24 +44,19 @@ class Processing(ImageProcessor):
         self.volume = 0
         self.averageVolume = 0
         self.counter = 0
-        self.cam_started = False
+        print("INITIALIZED")
 
     # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED
     def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1000):
         img = np.zeros([240, 320, 3], np.uint8)
-        
         if self.device == "__PI__":
-            if not self.cam_started:
-                self.cam = camera().start()
-                print("Starting Pi Camera...")
-                time.sleep(1)
-                print("Pi Camera Started!")
-                self.cam_started = True
             self.cam.resume()
             img = self.cam.read()
             
         elif self.device == "__IP__":
             ret, img = self.cam.read()
+
+        img = imutils.resize(img, width=320)
 
         orig = img.copy()
         gray = self.smoothImage(img)
@@ -119,6 +108,8 @@ class Processing(ImageProcessor):
                 cv2.putText(img, "{:.2f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.2f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
                 cv2.putText(img, "{:.2f}mL".format(self.averageVolume), (5, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+
+            cv2.putText(img, "Volume Detector", (65, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
             if window == 0:
                 return orig
             elif window == 1:
@@ -128,12 +119,8 @@ class Processing(ImageProcessor):
         return np.zeros([240, 320, 3], np.uint8)
 
     def release(self):
-        if self.device == "__PI__":
-            self.cam.resume()
-            self.cam.close()
-        elif self.device == "__IP__":
+        if self.device == "__IP__":
             self.cam.release()
-
 
     def getVolume(self):
         volume = np.pi * (self.diameter / 2) * (self.diameter / 2) * self.height
@@ -151,5 +138,4 @@ class Processing(ImageProcessor):
     def rest(self):
         self.volume, self.averageVolume, self.counter = 0, 0, 0
         if self.device == "__PI__":
-            if self.cam_started:
-                self.cam.pause()
+            self.cam.pause()
