@@ -118,9 +118,6 @@ class Scan(QDialog):
 
     def authenticated(self, userID, name, pts):
         self.stop_signal.emit()
-        msg = QMessageBox(self)
-        msg.information(self,
-                        "Success!", "Welcome, {}\nYour current incentive points is: {}".format(name, pts))
         self.switch_cam.emit(userID, name, pts)
 
     def register(self, uid):
