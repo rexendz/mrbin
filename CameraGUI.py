@@ -4,13 +4,19 @@ from PyQt5.QtCore import *
 import cv2
 import os
 from camproc import Processing
+from camrecog import ObjectClassifier
 import sys
+try:
+    from picam import camera
+except ImportError or ImportError:
+    print("Failed importing picam.py **THIS IS NORMAL IF RUNNING ON NON-RASPBIAN**")
 
 
 class CameraImage(QObject):
     finished = pyqtSignal()  # give worker class a finished signal
     changePixmap = pyqtSignal(QImage)
     noChange = pyqtSignal()
+    notBottle = pyqtSignal()
     gotVolume = pyqtSignal(float, float, float)
     
     def __init__(self, device, url, image, reader, parent=None):
@@ -21,12 +27,23 @@ class CameraImage(QObject):
         self.image = image
         self.stopped = False
         self.objectDetected = False
-        self.change = True
+        if device == "__PI__":
+            self.cam = camera().start()
+        else:
+            self.cam = cv2.VideoCapture(url)
+        self.phase = 1
+        self.change = False
+        self.bottleDetected = 0
+        self.recog = None
+        self.proc = None
+        QThread.sleep(1)
 
     def do_work(self):
         if self.reader is not None:
             self.reader.resume()
-        cam = Processing(self.device, self.url)
+        if self.phase == 1:
+            self.recog = ObjectClassifier(self.device, cam=self.cam)
+            self.recog.start()
 
         while not self.stopped:
             if self.reader is not None:
@@ -41,7 +58,11 @@ class CameraImage(QObject):
                 self.objectDetected = True
 
             if not self.objectDetected:
-                cam.rest()
+                if self.phase == 1:
+                    self.recog.rest()
+                elif self.phase == 2:
+                    self.proc.rest()
+                    self.bottleDetected = 0
                 if self.change:
                     self.noChange.emit()
                     self.change = False
@@ -49,7 +70,12 @@ class CameraImage(QObject):
             elif self.objectDetected:
                 if not self.change:
                     QThread.sleep(1)
-                frame = cam.getProcessedImage(self.image)
+
+                if self.phase == 1:
+                    frame = self.recog.getProcessedImage()
+                elif self.phase == 2:
+                    frame = self.proc.getProcessedImage(self.image)
+
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 bytesPerLine = ch * w
@@ -57,15 +83,28 @@ class CameraImage(QObject):
                 p = convertToQtFormat.scaled(320, 240, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)
                 self.change = True
-                if cam.counter > 500:
-                    self.reader.write('S')
-                    self.gotVolume.emit(cam.getAveVol(), cam.getAveHei(), cam.getAveDia())
-                    self.stop()
+                if self.phase == 1:
+                    if self.recog.numDetections > 100:
+                        print(self.recog.getDetection())
+                        if self.recog.getDetection() == 'bottle':
+                            self.phase = 2
+                            self.proc = Processing(self.device, cam=self.cam)
+                        else:
+                            print("STOPPPPP")
+                            self.notBottle.emit()
+                            self.stop()
+
+                elif self.phase == 2:
+                    if self.proc.counter > 500:
+                        if self.reader is not None:
+                            self.reader.write('S')
+                        self.gotVolume.emit(self.proc.getAveVol(), self.proc.getAveHei(), self.proc.getAveDia())
+                        self.stop()
 
         if self.reader is not None:
             self.reader.write('X')
             self.reader.pause()
-        cam.release()
+        self.cam.release()
         self.finished.emit()
 
     def stop(self):
@@ -176,5 +215,5 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__IP__", "https://192.168.1.6:8080/video", 1, "amaze", "959", None)
+    window = Cam("__IP__", "http://192.168.1.3:8080/video", 1, 1, "amaze", "959", None)
     app.exec()

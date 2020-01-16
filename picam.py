@@ -35,6 +35,7 @@ class camera:
         return self.frame
     
     def close(self):
+        self.paused = False
         self.stopped = True
 
     def pause(self):
@@ -42,4 +43,3 @@ class camera:
         
     def resume(self):
         self.paused = False
-        
