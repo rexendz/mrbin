@@ -21,7 +21,7 @@ class Window(QWidget):
     switch_about = pyqtSignal()
     close_all = pyqtSignal()
 
-    def __init__(self, arduino):
+    def __init__(self, arduino, sql):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -32,6 +32,7 @@ class Window(QWidget):
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.arduino = arduino
+        self.sql = sql
 
         self.InitWindow()
         self.InitComponents()
@@ -63,9 +64,6 @@ class Window(QWidget):
         btn4 = QPushButton("About", self)
         btn5 = QPushButton("Exit", self)
 
-        if not self.arduino:
-            btn1.setDisabled(True)
-
         btn1.setStyleSheet("background-color : #81c14b; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn2.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
         btn3.setStyleSheet("background-color : #aeb7b3; color : #1b2f33; font : 20px; font-family : Sanserif;")
@@ -86,7 +84,13 @@ class Window(QWidget):
         self.vbox.addWidget(btn5)
 
     def btn1Action(self):
-        self.switch_scan.emit(self)
+        if self.arduino:
+            self.switch_scan.emit(self)
+        else:
+            QMessageBox().warning(self, "Error", """
+            Error connecting to microcontroller!
+            Please contact system adminstrators.
+            """)
 
     def btn2Action(self):
         msg = QMessageBox()
@@ -104,7 +108,13 @@ class Window(QWidget):
         """)
 
     def btn3Action(self):
-        self.switch_login.emit()
+        if self.sql:
+            self.switch_login.emit()
+        else:
+            QMessageBox().warning(self, "Error", """
+            Error connecting to SQL Database!
+            Please contact system adminstrators.
+            """)
 
     def btn4Action(self):
         self.switch_about.emit()
@@ -134,7 +144,9 @@ class Controller:
         try:
             self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
             print("SQL Connection Success")
+            self.sqlExist = True
         except OperationalError:
+            self.sqlExist = False
             print("Error connecting to database")
         try:
             self.reader = SerialListener().start()
@@ -147,7 +159,7 @@ class Controller:
     def show_window(self, prev_window):
         if prev_window is not None:
             prev_window.hide()
-        self.window = Window(self.arduino)
+        self.window = Window(self.arduino, self.sqlExist)
         self.window.switch_scan.connect(self.show_scan)
         self.window.switch_about.connect(self.show_about)
         self.window.switch_login.connect(self.show_login)
