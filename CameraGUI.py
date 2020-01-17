@@ -220,5 +220,5 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__IP__", "http://192.168.1.3:8080/video", 1, 1, "amaze", "959", None)
+    window = Cam("__IP__", "http://192.168.1.64:8080/video", 1, 1, "amaze", "959", None)
     app.exec()
