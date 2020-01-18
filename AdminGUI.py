@@ -234,6 +234,8 @@ class DeleteRecords(ViewRecords):
             self.vbox.removeWidget(self.comboBox)
             self.vbox.removeWidget(self.lbl1)
             self.vbox.removeWidget(self.table)
+            self.users = self.sql.readAll()
+            self.name = []
             self.InitComponents()
             self.InitNew()
             self.show()

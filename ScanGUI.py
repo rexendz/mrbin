@@ -123,7 +123,7 @@ class Scan(QDialog):
     def register(self, uid):
         ret = QMessageBox.question(self,
                                    "No Record in Database",
-                                   "Your UID: {} is not listed in our database\nCreate new account?".format(uid),
+                                   "<FONT COLOR='#FFFFFF'>Your UID: {} is not listed in our database\nCreate new account?</FONT>".format(uid),
                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if ret == QMessageBox.Yes:
             self.stop_signal.emit()
