@@ -87,34 +87,59 @@ class Window(QWidget):
         if self.arduino:
             self.switch_scan.emit(self)
         else:
-            QMessageBox().warning(self, "Error", """
+            msg = QMessageBox()
+            msg.setWindowTitle("Instructions")
+            msg.setWindowFlags(Qt.FramelessWindowHint)
+            msg.setIcon(QMessageBox.Warning)
+            msg.setGeometry(self.left+60, self.top+100, 320, 240)
+            msg.setStyleSheet("QLabel{ color : white}")
+            msg.setStyleSheet("background-color: #212121")
+            msg.setText("""
             Error connecting to microcontroller!
             Please contact system adminstrators.
             """)
+            msg.exec()
 
     def btn2Action(self):
         msg = QMessageBox()
-        msg.information(self, "Instructions", """
-        How to use MR BIN:
+        msg.setWindowTitle("Instructions")
+        msg.setWindowFlags(Qt.FramelessWindowHint)
+        msg.setIcon(QMessageBox.Information)
+        msg.setMaximumHeight(240)
+        msg.setMaximumWidth(320)
+        msg.setMinimumHeight(240)
+        msg.setMinimumWidth(320)
+        msg.setGeometry(self.left+10, self.top+30, 320, 240)
+        msg.setStyleSheet("QLabel{ color : white}")
+        msg.setStyleSheet("background-color: #212121")
+        msg.setText("""How to use MR BIN:
         1.) Hold your ID near the ID Scanner.
         2.) If used for the first time, input your name.
-        3.) Place the plastic bottle into the enclosure.
+        3.) Place the bottle inside the enclosure.
         4.) Wait for the device to finish processing the object.
-        5.) You will be credited with incentives.
+        5.) You will be credited with incentive points.
         
         Note:
-        If you placed an object that is not a plastic bottle, you will be 
-        asked to remove it and you will not get any incentive points.
-        """)
+        If you placed an object that is not a bottle, you will
+        be asked to remove it and you will not get any points.""")
+        msg.exec()
 
     def btn3Action(self):
         if self.sql:
             self.switch_login.emit()
         else:
-            QMessageBox().warning(self, "Error", """
+            msg = QMessageBox()
+            msg.setWindowTitle("Instructions")
+            msg.setWindowFlags(Qt.FramelessWindowHint)
+            msg.setIcon(QMessageBox.Warning)
+            msg.setGeometry(self.left+60, self.top+100, 320, 240)
+            msg.setStyleSheet("QLabel{ color : white}")
+            msg.setStyleSheet("background-color: #212121")
+            msg.setText("""
             Error connecting to SQL Database!
             Please contact system adminstrators.
             """)
+            msg.exec()
 
     def btn4Action(self):
         self.switch_about.emit()

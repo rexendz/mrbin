@@ -110,15 +110,14 @@ void loop() {
         started = 'N';
       }
       else if(rx == 'S'){
-        for(int i = 50; i <= 120; i++){
+        for(int i = 40; i <= 100; i++){
           servo.write(i);
           delay(10);
         }
         delay(2000);
-        for(int i = 120; i >= 50; i--){
-          servo.write(i);
-          delay(10);
-        }
+        servo.write(40);
+        delay(2000);
+        started = 'N';
       }
       else{
         digitalWrite(LED, HIGH);
