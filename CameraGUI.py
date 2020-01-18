@@ -84,9 +84,10 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if self.phase == 1:
-                    if self.recog.numDetections > 100:
-                        print(self.recog.getDetection())
-                        if self.recog.getDetection() == 'bottle':
+                    if self.recog.numDetections > 150:
+                        detected = self.recog.getDetection()
+                        print(detected)
+                        if detected == 'bottle':
                             self.phase = 2
                             self.proc = Processing(self.device, cam=self.cam)
                         else:

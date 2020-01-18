@@ -85,7 +85,7 @@ class ObjectClassifier:
                 outputQueue.put(detections)
 
     def getDetection(self):
-        classID = max(set(self.detectedID), key=self.detectedID.count)
+        classID = max(set(self.detectedID), key=self.detectedID.count)  # Get average detection id
         self.idx = None
         if classID is not None:
             return self.CLASSES[classID]
@@ -95,6 +95,9 @@ class ObjectClassifier:
 
     def rest(self):
         self.numDetections = 0
+        self.detectedID = []
+        self.idx = None
+        self.detections = None
         if self.device == "__PI__":
             self.cam.pause()
 
