@@ -7,6 +7,7 @@ from LoginGUI import Login
 from CameraGUI import Cam
 from AdminGUI import *
 from ResultGUI import Result
+from InstructionsGUI import Instructions
 import os
 import sys
 try:
@@ -19,6 +20,7 @@ class Window(QWidget):
     switch_scan = pyqtSignal(QWidget)
     switch_login = pyqtSignal()
     switch_about = pyqtSignal()
+    switch_instructions = pyqtSignal()
     close_all = pyqtSignal()
 
     def __init__(self, arduino, sql):
@@ -95,33 +97,11 @@ class Window(QWidget):
             msg.setStyleSheet("QLabel{ color : white}")
             msg.setStyleSheet("background-color: #212121")
             msg.setText("""<FONT COLOR='#FFFFFF'>Error connecting to microcontroller!
-            Please contact system adminstrators.
-            </FONT>""")
+            Please contact system adminstrators.</FONT>""")
             msg.exec()
 
     def btn2Action(self):
-        msg = QMessageBox()
-        msg.setWindowTitle("Instructions")
-        msg.setWindowFlags(Qt.FramelessWindowHint)
-        msg.setIcon(QMessageBox.Information)
-        msg.setMaximumHeight(240)
-        msg.setMaximumWidth(320)
-        msg.setMinimumHeight(240)
-        msg.setMinimumWidth(320)
-        msg.setGeometry(self.left+10, self.top+30, 320, 240)
-        msg.setStyleSheet("QLabel{ color : white}")
-        msg.setStyleSheet("background-color: #212121")
-        msg.setText("""How to use MR BIN:
-        1.) Hold your ID near the ID Scanner.
-        2.) If used for the first time, input your name.
-        3.) Place the bottle inside the enclosure.
-        4.) Wait for the device to finish processing the object.
-        5.) You will be credited with incentive points.
-        
-        Note:
-        If you placed an object that is not a bottle, you will
-        be asked to remove it and you will not get any points.""")
-        msg.exec()
+        self.switch_instructions.emit()
 
     def btn3Action(self):
         if self.sql:
@@ -164,6 +144,7 @@ class Controller:
         self.delete = None
         self.modify = None
         self.result = None
+        self.instructions = None
 
         try:
             self.sql = SQLServer("localhost", "root", passwd="", database="mrbin")
@@ -185,9 +166,15 @@ class Controller:
             prev_window.hide()
         self.window = Window(self.arduino, self.sqlExist)
         self.window.switch_scan.connect(self.show_scan)
+        self.window.switch_instructions.connect(self.show_instructions)
         self.window.switch_about.connect(self.show_about)
         self.window.switch_login.connect(self.show_login)
         self.window.close_all.connect(self.exit)
+
+    def show_instructions(self):
+        self.window.hide()
+        self.instructions = Instructions()
+        self.instructions.switch_back.connect(self.show_window)
 
     def show_scan(self, prev_window):
         prev_window.hide()
