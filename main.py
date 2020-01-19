@@ -94,10 +94,9 @@ class Window(QWidget):
             msg.setGeometry(self.left+60, self.top+100, 320, 240)
             msg.setStyleSheet("QLabel{ color : white}")
             msg.setStyleSheet("background-color: #212121")
-            msg.setText("""
-            Error connecting to microcontroller!
+            msg.setText("""<FONT COLOR='#FFFFFF'>Error connecting to microcontroller!
             Please contact system adminstrators.
-            """)
+            </FONT>""")
             msg.exec()
 
     def btn2Action(self):
