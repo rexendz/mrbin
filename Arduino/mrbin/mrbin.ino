@@ -110,7 +110,7 @@ void loop() {
         started = 'N';
       }
       else if(rx == 'S'){
-        for(int i = 80; i <= 150; i++){
+        for(int i = 80; i <= 160; i++){
           servo.write(i);
           delay(10);
         }
