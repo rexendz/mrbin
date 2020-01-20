@@ -75,21 +75,25 @@ class ObjectClassifier:
             min_score_thresh=0.80)
 
         return img
+    
+    def getCoordinates(self):
+        ymin = int((self.boxes[0][0][0]*240))
+        xmin = int((self.boxes[0][0][1]*320))
+        ymax = int((self.boxes[0][0][2]*240))
+        xmax = int((self.boxes[0][0][3]*320))
+        return (ymin, ymax, xmin, xmax)
 
     def getObjectClass(self):
         label = self.classes[0][0]
+        self.classes = None
         if label == 1.0:
             return "Bottle"
-            self.classes = None
         elif label == 2.0:
             return "Damaged-Bottle"
-            self.classes = None
         elif label == 3.0:
             return "Paper"
-            self.classes = None
         elif label == 4.0:
             return "Plastic-Bag"
-            self.classes = None
 
     def getObjectScore(self):
         return self.scores
@@ -102,11 +106,18 @@ class ObjectClassifier:
             self.cam.pause()
 
 if __name__ == "__main__":
-    recog = ObjectClassifier("__IP__", "http://192.168.1.3:8080/video")
+    from picam import camera
+    cam = camera().start()
+    recog = ObjectClassifier("__PI__", "http://192.168.1.3:8080/video", cam)
     while True:
         recog.sessionRun()
         img = recog.getProcessedImage()
-        print(recog.getObjectScore()[0][0])
+        coords = recog.getCoordinates()
+        if coords is not None:
+            (y1, y2, x1, x2) = coords
+            height = y2-y1
+            width = x2-x1
+            cv2.line(img, (x1, y1), (x2, y1), (0, 0, 255), 3)
         cv2.imshow('img', img)
         q = cv2.waitKey(1)
         if q == ord('q'):

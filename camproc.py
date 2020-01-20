@@ -12,7 +12,7 @@ class ImageProcessor:
 
     def smoothImage(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        result = cv2.GaussianBlur(gray, (7, 7), 0)
+        result = cv2.GaussianBlur(gray, (5, 5), 0)
         return result
 
     def getEdges(self, img, lth, uth):
@@ -34,7 +34,7 @@ class ImageProcessor:
 
 class Processing(ImageProcessor):
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
-    def __init__(self, device="__PI__", cam=None, ppmX=8.57, ppmY=10):
+    def __init__(self, device="__PI__", cam=None, ppmX=1, ppmY=1):
         self.device = device
         self.cam = cam
         self.ppmX = ppmX
@@ -47,7 +47,7 @@ class Processing(ImageProcessor):
         print("INITIALIZED")
 
     # 0 - RAW IMAGE, 1 - IMAGE, 2 - EDGED
-    def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=60, minarea=1000):
+    def getProcessedImage(self, window=1, cannyLTH=0, cannyUTH=30, minarea=300):
         img = np.zeros([240, 320, 3], np.uint8)
         if self.device == "__PI__":
             self.cam.resume()
@@ -70,7 +70,7 @@ class Processing(ImageProcessor):
 
                 box = self.getRectContour(c)
                 (tl, tr, br, bl) = box
-                if tl[0] < 5 or tr[0] > 315 or br[0] > 315 or bl[0] < 5 or tl[1] < 5 or tr[1] < 5 or br[1] > 275 or bl[1] > 275:
+                if tl[0] < 10 or tr[0] > 300 or br[0] > 300 or bl[0] < 10 or tl[1] < 10 or tr[1] < 10 or br[1] > 200 or bl[1] > 200:
                     continue
                 #print("tl:", tl)
                 #print("tr:", tr)
@@ -87,7 +87,6 @@ class Processing(ImageProcessor):
                 (blbrX, blbrY) = self.getMidpoint(bl, br)
                 (tlblX, tlblY) = self.getMidpoint(tl, bl)
                 (trbrX, trbrY) = self.getMidpoint(tr, br)
-            
                 cv2.circle(img, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
                 cv2.circle(img, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
                 cv2.circle(img, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
@@ -139,3 +138,24 @@ class Processing(ImageProcessor):
         self.volume, self.averageVolume, self.counter = 0, 0, 0
         if self.device == "__PI__":
             self.cam.pause()
+
+if __name__ == "__main__":
+    def nothing(x):
+        pass
+
+    from picam import camera
+    cam = camera().start()
+    proc = Processing(cam=cam)
+    cv2.namedWindow('track')
+    cv2.createTrackbar('lth', 'track', 20, 255, nothing)
+    cv2.createTrackbar('uth', 'track', 60, 255, nothing)
+    import time
+    time.sleep(1)
+    while True:
+        img = proc.getProcessedImage(1, cv2.getTrackbarPos('lth', 'track'), cv2.getTrackbarPos('uth', 'track'))
+        cv2.imshow('img', img)
+        q = cv2.waitKey(1)
+        if q == ord('q'):
+            break
+    cv2.destroyAllWindows()
+    cam.close()

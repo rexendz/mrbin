@@ -44,7 +44,7 @@ void setup() {
     Serial.write('\n');
   delay(5);
   digitalWrite(LED, LOW);
-  servo.write(50);
+  servo.write(80);
 }
 
 void loop() {
