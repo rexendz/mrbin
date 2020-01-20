@@ -61,7 +61,7 @@ class ViewRecords(QDialog):
                     self.table.setItem(i, j, QTableWidgetItem(str(result[i][j])))
 
         self.lbl1 = QLabel("MR BIN Users", self)
-        self.lbl1.setStyleSheet("font : 40px; font-family : Sanserif;")
+        self.lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : white")
         self.lbl1.setAlignment(Qt.AlignHCenter)
 
         self.btn1 = QPushButton(self)
@@ -70,6 +70,7 @@ class ViewRecords(QDialog):
 
         self.btn1.setStyleSheet("color : black; background-color : #aeb7b3; font : 20px; font-family : Sanserif;")
 
+        self.table.setStyleSheet("color : white; font-family : Sanserif;")
         self.table.setGeometry(0, 0, 320, 240)
         self.table.resizeRowsToContents()
         self.table.resizeColumnsToContents()

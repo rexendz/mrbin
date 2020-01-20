@@ -36,7 +36,7 @@ class CameraImage(QObject):
         self.bottleDetected = 0
         self.recog = None
         self.proc = None
-        QThread.sleep(1)
+        QThread.sleep(2)
 
     def do_work(self):
         if self.reader is not None:
@@ -84,7 +84,7 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if self.phase == 1:
-                    if self.recog.numDetections > 150:
+                    if self.recog.numDetections > 200:
                         detected = self.recog.getDetection()
                         print(detected)
                         if detected == 'bottle':
@@ -104,7 +104,7 @@ class CameraImage(QObject):
         if self.reader is not None:
             self.reader.write('X')
             self.reader.pause()
-        self.cam.release()
+        self.cam.close()
         self.finished.emit()
 
     def stop(self):
@@ -192,7 +192,7 @@ class Cam(QDialog):
     def NotABottle(self):
         QMessageBox.information(self, "Result", "Object is NOT a bottle, please try again")
         self.worker.stop()
-        self.switch_back(self)
+        self.switch_back.emit(self)
 
     def InitComponents(self):
         lbl1 = QLabel(("User: " + self.name), self)
@@ -221,5 +221,5 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__IP__", "http://192.168.1.64:8080/video", 1, 1, "amaze", "959", None)
+    window = Cam("__PI__", "http://192.168.1.64:8080/video", 2, 1, "amaze", "959", None)
     app.exec()
