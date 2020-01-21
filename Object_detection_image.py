@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import tensorflow.compat.v1 as tf
 import sys
+from scipy.spatial import distance as dist
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
@@ -106,6 +107,9 @@ class ObjectClassifier:
             self.cam.pause()
 
 if __name__ == "__main__":
+    def getMidpoint(ptA, ptB):
+        return (ptA[0] + ptB[0]) / 2, (ptA[1] + ptB[1]) / 2
+    
     from picam import camera
     cam = camera().start()
     recog = ObjectClassifier("__PI__", "http://192.168.1.3:8080/video", cam)
@@ -114,13 +118,36 @@ if __name__ == "__main__":
         img = recog.getProcessedImage()
         coords = recog.getCoordinates()
         if coords is not None:
+            ppmX, ppmY = 7.705882353, 6.8
             (y1, y2, x1, x2) = coords
             height = y2-y1
             width = x2-x1
-            cv2.line(img, (x1, y1), (x2, y1), (0, 0, 255), 3)
+            (tltrX, tltrY) = getMidpoint((x1, y1), (x2, y1))
+            (blbrX, blbrY) = getMidpoint((x1, y2), (x2, y2))
+            (tlblX, tlblY) = getMidpoint((x1, y1), (x1, y2))
+            (trbrX, trbrY) = getMidpoint((x2, y1), (x2, y2))
+            cv2.circle(img, (int(tltrX), int(tltrY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(blbrX), int(blbrY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(tlblX), int(tlblY)), 2, (255, 0, 0), -1)
+            cv2.circle(img, (int(trbrX), int(trbrY)), 2, (255, 0, 0), -1)
+        
+            cv2.line(img, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)), (100, 0, 100), 1)
+            cv2.line(img, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)), (100, 0, 100), 1)
+            dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
+            dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
+                
+            dimA = dA / ppmY  # DIAMETER
+            dimB = dB / ppmX  # HEIGHT
+            cv2.putText(img, "{:.2f}cm".format(dimB), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+            cv2.putText(img, "{:.2f}cm".format(dimA), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+                
+            diameter = dimA
+            height = dimB
+                
+            
         cv2.imshow('img', img)
         q = cv2.waitKey(1)
         if q == ord('q'):
             break
     cv2.destroyAllWindows()
-    recog.release()
+    cam.close()

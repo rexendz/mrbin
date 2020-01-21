@@ -51,8 +51,7 @@ class Processing(ImageProcessor):
         img = np.zeros([240, 320, 3], np.uint8)
         if self.device == "__PI__":
             self.cam.resume()
-            img = self.cam.read()
-            
+            img = self.cam.read()            
         elif self.device == "__IP__":
             ret, img = self.cam.read()
 
