@@ -90,7 +90,7 @@ class CameraImage(QObject):
                             self.stop()
 
                 elif self.phase == 2:
-                    if self.proc.counter >= 40:
+                    if self.proc.counter >= 20:
                         if self.reader is not None:
                             self.reader.write('S')
                         self.gotVolume.emit(self.proc.getAveVol(), self.proc.getHeight(), self.proc.getDiameter())
@@ -176,7 +176,7 @@ class Cam(QDialog):
     def printVolume(self, vol, height, diameter):
         msg = QMessageBox()
         msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
-        msg.information(self, "Measurement Success", "Average Measured Volume: {:.2f}mL".format(vol))
+        msg.information(self, "Measurement Success", "<FONT COLOR='#FFFFFF'>Average Measured Volume: {:.2f}mL</FONT>".format(vol))
         self.switch_result.emit(self.userID, self.name, self.pts, vol, height, diameter)
 
     def setImage(self, image=None):
