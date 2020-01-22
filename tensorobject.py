@@ -78,7 +78,7 @@ class ObjectClassifier:
             self.category_index,
             use_normalized_coordinates=True,
             line_thickness=3,
-            min_score_thresh=0.90)
+            min_score_thresh=0.95)
         if img is not self.image:
             detected = True
             self.counter += 1
@@ -93,8 +93,10 @@ class ObjectClassifier:
         return (ymin, ymax, xmin, xmax)
 
     def getObjectClass(self):
-        label = self.classes[0][0]
-        self.classes = None
+        try:
+            label = self.classes[self.scores > 0.95][0]
+        except:
+            return None
         if label == 1.0:
             return "Bottle"
         elif label == 2.0:
@@ -135,6 +137,7 @@ class VolumeMeasurement:
         self.coords = self.recog.getCoordinates()
         if detected:
             obj = self.recog.getObjectClass()
+            print("object: ", obj)
             if obj is "Bottle":
                 img = self.drawDimensions(img)
         return img
