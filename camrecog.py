@@ -103,7 +103,12 @@ class ObjectClassifier:
 
 
 if __name__ == "__main__":
-    recog = ObjectClassifier("__IP__", 0)
+    from picam import camera
+    cam = camera().start()
+    import time
+    time.sleep(1)
+    
+    recog = ObjectClassifier("__PI__", cam)
     recog.start()
     while True:
         img = recog.getProcessedImage()
@@ -111,6 +116,6 @@ if __name__ == "__main__":
         q = cv2.waitKey(1)
         if q == ord('q'):
             break
-        print(recog.getDetection())
+    cam.close()
+    print(recog.getDetection())
     cv2.destroyAllWindows()
-    recog.release()
