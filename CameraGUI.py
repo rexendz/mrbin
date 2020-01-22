@@ -3,8 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import cv2
 import os
-from camproc import Processing
-from camrecog import ObjectClassifier
+from tensorobject import ObjectClassifier, VolumeMeasurement
 import sys
 try:
     from picam import camera
@@ -19,7 +18,7 @@ class CameraImage(QObject):
     notBottle = pyqtSignal()
     gotVolume = pyqtSignal(float, float, float)
     
-    def __init__(self, device, url, image, reader, parent=None):
+    def __init__(self, device, url, image, reader, tensor, parent=None):
         super().__init__(parent)
         self.device = device
         self.url = url
@@ -33,18 +32,15 @@ class CameraImage(QObject):
             self.cam = cv2.VideoCapture(url)
         self.phase = 1
         self.change = False
-        self.bottleDetected = 0
-        self.recog = None
-        self.proc = None
         QThread.sleep(2)
+        self.recog = tensor
+        self.recog.setCamera(self.cam)
+        self.proc = VolumeMeasurement(self.recog)
 
     def do_work(self):
         if self.reader is not None:
             self.reader.resume()
-        if self.phase == 1:
-            self.recog = ObjectClassifier(self.device, cam=self.cam)
-            self.recog.start()
-
+            
         while not self.stopped:
             if self.reader is not None:
                 distance = self.reader.read()
@@ -62,7 +58,6 @@ class CameraImage(QObject):
                     self.recog.rest()
                 elif self.phase == 2:
                     self.proc.rest()
-                    self.bottleDetected = 0
                 if self.change:
                     self.noChange.emit()
                     self.change = False
@@ -72,10 +67,11 @@ class CameraImage(QObject):
                     QThread.sleep(1)
 
                 if self.phase == 1:
-                    frame = self.recog.getProcessedImage()
+                    self.recog.classes = None
+                    detect, frame = self.recog.getProcessedImage()
                 elif self.phase == 2:
-                    frame = self.proc.getProcessedImage(self.image)
-
+                    frame = self.proc.getProcessedImage()
+                
                 rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 h, w, ch = rgbImage.shape
                 bytesPerLine = ch * w
@@ -84,21 +80,20 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if self.phase == 1:
-                    if self.recog.numDetections > 200:
-                        detected = self.recog.getDetection()
+                    if self.recog.counter >= 10:
+                        detected = self.recog.getObjectClass()
                         print(detected)
-                        if detected == 'bottle':
+                        if detected == 'Bottle':
                             self.phase = 2
-                            self.proc = Processing(self.device, cam=self.cam)
                         else:
                             self.notBottle.emit()
                             self.stop()
 
                 elif self.phase == 2:
-                    if self.proc.counter > 500:
+                    if self.proc.counter >= 40:
                         if self.reader is not None:
                             self.reader.write('S')
-                        self.gotVolume.emit(self.proc.getAveVol(), self.proc.getAveHei(), self.proc.getAveDia())
+                        self.gotVolume.emit(self.proc.getAveVol(), self.proc.getHeight(), self.proc.getDiameter())
                         self.stop()
 
         if self.reader is not None:
@@ -115,7 +110,7 @@ class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
     switch_result = pyqtSignal(int, str, int, float, float, float)
 
-    def __init__(self, device, url, image, userID, name, pts, reader):
+    def __init__(self, device, url, image, userID, name, pts, reader, tensor):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -130,6 +125,7 @@ class Cam(QDialog):
         self.name = name
         self.pts = pts
         self.image = image
+        self.tensor = tensor
         self.pic = None
         self.device = device
         self.ip = url
@@ -145,7 +141,7 @@ class Cam(QDialog):
 
     def InitWorker(self):
         self.thread = QThread(parent=self)
-        self.worker = CameraImage(self.device, self.ip, self.image, self.reader)
+        self.worker = CameraImage(self.device, self.ip, self.image, self.reader, self.tensor)
 
         self.worker.moveToThread(self.thread)
 
@@ -221,5 +217,6 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = Cam("__PI__", "http://192.168.1.64:8080/video", 2, 1, "amaze", "959", None)
+    tensor = ObjectClassifier("__PI__", 0, )
+    window = Cam("__PI__", "http://192.168.1.64:8080/video", 2, 1, "amaze", "959", None, tensor)
     app.exec()

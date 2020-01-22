@@ -127,7 +127,7 @@ void loop() {
         double dist1 = getDistance(1);
         double dist2 = getDistance(2);
         double dist3 = getDistance(3);
-        if((dist1 > 2 && dist1 <= 15) || (dist2 > 2 && dist2 <= 30) || (dist3 >2 && dist3 <= 30))
+        if((dist1 > 2 && dist1 <= 15) || (dist2 > 2 && dist2 <= 20) || (dist3 >2 && dist3 <= 20))
           Serial.println('O');
         delay(100);
       }
