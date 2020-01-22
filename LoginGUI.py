@@ -96,14 +96,14 @@ class Login(QDialog):
     def btn1Action(self):
         msg = QMessageBox()
         if self.usr.text() == '' or self.pwd.text() == '' or (self.usr.text() == 'Username' and self.pwd.text() == 'Password'):
-            msg.warning(self, "Login Error", "Empty Fields!\nFill out the fields.")
+            msg.warning(self, "Login Error", "<FONT COLOR='#FFFFFF'>Empty Fields!\nFill out the fields.</FONT>")
         else:
             if str(self.usr.text()) == "admin" and str(self.pwd.text()) == "12345":
-                msg.information(self, "Login Success", "Login Successful!\nAdministator mode activated.")
+                msg.information(self, "Login Success", "<FONT COLOR='#FFFFFF'>Login Successful!\nAdministator mode activated.</FONT>")
                 self.switch_admin.emit(self)
 
             else:
-                msg.warning(self, "Login Error", "Wrong credentials")
+                msg.warning(self, "Login Error", "<FONT COLOR='#FFFFFF'>Wrong credentials</FONT>")
 
     def btn2Action(self):
         self.switch_back.emit(self)

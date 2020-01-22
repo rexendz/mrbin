@@ -8,6 +8,7 @@ from CameraGUI import Cam
 from AdminGUI import *
 from ResultGUI import Result
 from InstructionsGUI import Instructions
+from tensorobject import ObjectClassifier
 import os
 import sys
 try:
@@ -137,6 +138,7 @@ class Controller:
         self.about = None
         self.login = None
         self.cam = None
+        self.tensor = ObjectClassifier()
         self.admin = None
         self.view = None
         self.insert = None
@@ -201,7 +203,7 @@ class Controller:
 
     def show_cam(self, userID, name, pts):
         self.scan.hide()
-        self.cam = Cam(self.device, self.url, self.image, userID, name, pts, self.reader)
+        self.cam = Cam(self.device, self.url, self.image, userID, name, pts, self.reader, self.tensor)
         self.cam.switch_back.connect(self.show_window)
         self.cam.switch_result.connect(self.show_result)
 

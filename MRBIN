@@ -1,3 +1,4 @@
 #!/bin/bash
+export PYTHONPATH=$PYTHONPATH:/home/pi/tensorflow1/models/research:/home/pi/tensorflow1/models/research/slim
 python3 /home/pi/mrbin/main.py
 
