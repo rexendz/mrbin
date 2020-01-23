@@ -34,7 +34,7 @@ class CameraImage(QObject):
         self.change = False
         QThread.sleep(2)
         self.recog = tensor
-        self.recog.setCamera(self.cam)
+        self.recog.initialize(self.cam)
         self.proc = VolumeMeasurement(self.recog)
 
     def do_work(self):
@@ -80,9 +80,9 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if self.phase == 1:
-                    if self.recog.counter >= 10:
+                    if self.recog.counter >= 20:
                         detected = self.recog.getObjectClass()
-                        print(detected)
+                        self.recog.rest()
                         if detected == 'Bottle':
                             self.phase = 2
                         else:
@@ -93,7 +93,13 @@ class CameraImage(QObject):
                     if self.proc.counter >= 20:
                         if self.reader is not None:
                             self.reader.write('S')
-                        self.gotVolume.emit(self.proc.getAveVol(), self.proc.getHeight(), self.proc.getDiameter())
+                        aveVol = self.proc.getAveVol()
+                        height = self.proc.getHeight()
+                        diameter = self.proc.getDiameter()
+                        if diameter >= height:
+                            self.notBottle.emit()
+                        else:
+                            self.gotVolume.emit(aveVol, height, diameter)
                         self.stop()
 
         if self.reader is not None:
@@ -186,7 +192,7 @@ class Cam(QDialog):
             self.pic.setPixmap(QPixmap(self.userpath + '/mrbin/res/instruction.png'))
 
     def NotABottle(self):
-        QMessageBox.information(self, "Result", "Object is NOT a bottle, please try again")
+        QMessageBox.information(self, "Result", "<FONT COLOR='#FFFFFF'>Object is NOT a bottle, please try again</FONT>")
         self.worker.stop()
         self.switch_back.emit(self)
 
