@@ -91,8 +91,6 @@ class CameraImage(QObject):
 
                 elif self.phase == 2:
                     if self.proc.counter >= 20:
-                        if self.reader is not None:
-                            self.reader.write('S')
                         aveVol = self.proc.getAveVol()
                         height = self.proc.getHeight()
                         diameter = self.proc.getDiameter()
@@ -100,6 +98,8 @@ class CameraImage(QObject):
                             self.notBottle.emit()
                         else:
                             self.gotVolume.emit(aveVol, height, diameter)
+                        if self.reader is not None:
+                            self.reader.write('S')
                         self.stop()
 
         if self.reader is not None:
