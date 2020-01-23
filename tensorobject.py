@@ -19,6 +19,7 @@ class ObjectClassifier:
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
     def __init__(self, device="__PI__", url="0.0.0.0", cam=None):
         print("Initializing Tensorflow...")
+        self.userpath = os.getenv("HOME")
         self.device = device
         self.cam = None
         if self.device == "__IP__":
@@ -30,8 +31,9 @@ class ObjectClassifier:
         self.confidence = None
         self.image = None
         self.counter = 0
-        self.userpath = os.getenv("HOME")
-        dir = self.userpath+'/mrbin/tensorflow/inference_graph'
+        self.detectedID = []
+
+        dir = self.userpath+'/mrbin/tensorflow/inference_graph_27128'
         ckpt_path = os.path.join(dir, 'frozen_inference_graph.pb')
         labels_path = os.path.join(dir, 'labelmap.pbtxt')
         NUM_CLASSES = 4
@@ -48,6 +50,15 @@ class ObjectClassifier:
 
             self.sess = tf.Session(graph=self.detection_graph)
         print("Tensor Initialized")
+
+    def initialize(self, cam):
+        self.boxes, self.scores, self.classes, self.num = None, None, None, None
+        self.confidence = None
+        self.image = None
+        self.counter = 0
+        self.detectedID = []
+        self.cam = cam
+
 
     def sessionRun(self):
         image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
@@ -82,6 +93,10 @@ class ObjectClassifier:
         if img is not self.image:
             detected = True
             self.counter += 1
+            try:
+                self.detectedID.append(self.classes[self.scores > 0.95][0])
+            except:
+                pass
         return detected, img
     
     def getCoordinates(self):
@@ -93,10 +108,10 @@ class ObjectClassifier:
         return (ymin, ymax, xmin, xmax)
 
     def getObjectClass(self):
-        try:
-            label = self.classes[self.scores > 0.95][0]
-        except:
+        if len(self.detectedID) < 10:
             return None
+        label = max(set(self.detectedID), key=self.detectedID.count)  # Get average detection id
+        self.detectedID = []
         if label == 1.0:
             return "Bottle"
         elif label == 2.0:
@@ -112,12 +127,9 @@ class ObjectClassifier:
     def release(self):
         self.cam.release()
 
-    def setCamera(self, cam):
-        self.cam = cam
-
     def rest(self):
         self.counter = 0
-        self.classes = None
+        self.detectedID = []
         if self.device == "__PI__":
             self.cam.pause()
 
@@ -156,8 +168,6 @@ class VolumeMeasurement:
 
     def drawDimensions(self, img):
         (y1, y2, x1, x2) = self.coords
-        height = y2-y1
-        width = x2-x1
         (tltrX, tltrY) = self.getMidpoint((x1, y1), (x2, y1))
         (blbrX, blbrY) = self.getMidpoint((x1, y2), (x2, y2))
         (tlblX, tlblY) = self.getMidpoint((x1, y1), (x1, y2))
@@ -195,18 +205,21 @@ class VolumeMeasurement:
 if __name__ == "__main__":
     def getMidpoint(ptA, ptB):
         return (ptA[0] + ptB[0]) / 2, (ptA[1] + ptB[1]) / 2
-    
-    from picam import camera
-    cam = camera().start()
-    recog = ObjectClassifier("__PI__", "http://192.168.1.3:8080/video")
-    recog.setCamera(cam)
+
+    recog = ObjectClassifier("__IP__", "http://192.168.1.3:8080/video")
     proc = VolumeMeasurement(recog)
     while True:
-        img = proc.getProcessedImage()        
+        _, img = recog.getProcessedImage()
+        if recog.counter > 20:
+            break
         cv2.imshow('img', img)
         q = cv2.waitKey(1)
         if q == ord('q'):
             break
-        
+    detected = recog.getObjectClass()
+    if detected is None:
+        print("No object Detected")
+    print(detected)
+    recog.rest()
+    recog.release()
     cv2.destroyAllWindows()
-    cam.close()
