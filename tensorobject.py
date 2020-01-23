@@ -17,15 +17,11 @@ sys.path.append("..")
 
 class ObjectClassifier:
     # device="__IP__"(IF USING IPWEBCAM) device="__PI__"(IF USING PI CAMERA)
-    def __init__(self, device="__PI__", url="0.0.0.0", cam=None):
+    def __init__(self, device="__PI__", cam=None):
         print("Initializing Tensorflow...")
         self.userpath = os.getenv("HOME")
         self.device = device
-        self.cam = None
-        if self.device == "__IP__":
-            self.cam = cv2.VideoCapture(url)
-        else:
-            self.cam = cam
+        self.cam = cam
 
         self.boxes, self.scores, self.classes, self.num = None, None, None, None
         self.confidence = None
