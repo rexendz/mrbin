@@ -105,7 +105,7 @@ class CameraImage(QObject):
         if self.reader is not None:
             self.reader.write('X')
             self.reader.pause()
-        self.cam.close()
+        self.cam.release()
         self.finished.emit()
 
     def stop(self):
@@ -223,6 +223,6 @@ class Cam(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    tensor = ObjectClassifier("__PI__", 0, )
-    window = Cam("__PI__", "http://192.168.1.64:8080/video", 2, 1, "amaze", "959", None, tensor)
+    tensor = ObjectClassifier("__IP__")
+    window = Cam("__IP__", "http://192.168.1.3:8080/video", 2, 1, "amaze", "959", None, tensor)
     app.exec()

@@ -34,7 +34,7 @@ class camera:
     def read(self):
         return self.frame
     
-    def close(self):
+    def release(self):
         self.paused = False
         self.stopped = True
 
