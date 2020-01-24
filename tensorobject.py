@@ -29,7 +29,7 @@ class ObjectClassifier:
         self.counter = 0
         self.detectedID = []
 
-        dir = self.userpath+'/mrbin/tensorflow/inference_graph_27128'
+        dir = self.userpath+'/mrbin/tensorflow/inference_graph_29782'
         ckpt_path = os.path.join(dir, 'frozen_inference_graph.pb')
         labels_path = os.path.join(dir, 'labelmap.pbtxt')
         NUM_CLASSES = 4
@@ -103,11 +103,22 @@ class ObjectClassifier:
         self.boxes = None
         return (ymin, ymax, xmin, xmax)
 
-    def getObjectClass(self):
-        if len(self.detectedID) < 10:
+    def getAveObjectClass(self):
+        if len(self.detectedID) < 5:
             return None
         label = max(set(self.detectedID), key=self.detectedID.count)  # Get average detection id
         self.detectedID = []
+        if label == 1.0:
+            return "Bottle"
+        elif label == 2.0:
+            return "Damaged-Bottle"
+        elif label == 3.0:
+            return "Paper"
+        elif label == 4.0:
+            return "Plastic-Bag"
+
+    def getObjectClass(self):
+        label = self.classes[self.scores > 0.95][0]
         if label == 1.0:
             return "Bottle"
         elif label == 2.0:
@@ -138,7 +149,7 @@ class VolumeMeasurement:
         self.volume = 0
         self.aveVol = None
         self.counter = 0
-        self.ppmX, self.ppmY = 6.862745, 7.5
+        self.ppmX, self.ppmY = 7.160714286, 7.5
 
     def getProcessedImage(self):
         detected, img = self.recog.getProcessedImage()
@@ -148,6 +159,7 @@ class VolumeMeasurement:
             print("object: ", obj)
             if obj is "Bottle":
                 img = self.drawDimensions(img)
+        cv2.putText(img, "Volume Detector", (65, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8,(255, 255, 255), 2)
         return img
 
     def getVolume(self):
@@ -186,7 +198,7 @@ class VolumeMeasurement:
         cv2.putText(img, "{:.2f}cm".format(self.height), (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
         cv2.putText(img, "{:.2f}cm".format(self.diameter), (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
         cv2.putText(img, "{:.2f}mL".format(self.aveVol), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
-
+    
         return img
 
     def rest(self):

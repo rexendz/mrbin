@@ -201,16 +201,17 @@ class Controller:
         self.about = About()
         self.about.switch_back.connect(self.show_window)
 
-    def show_cam(self, userID, name, pts):
-        self.scan.hide()
+    def show_cam(self, prev_window, userID, name, pts):
+        prev_window.hide()
         self.cam = Cam(self.device, self.url, self.image, userID, name, pts, self.reader, self.tensor)
         self.cam.switch_back.connect(self.show_window)
         self.cam.switch_result.connect(self.show_result)
 
     def show_result(self, userID, name, pts, vol, height, diameter):
         self.cam.hide()
-        self.result = Result(userID, name, pts, vol, height, diameter, self.sql)
+        self.result = Result(userID, name, pts, vol, height, diameter, self.sql, self.reader)
         self.result.switch_back.connect(self.show_window)
+        self.result.switch_again.connect(self.show_cam)
 
     def show_admin(self, prev_window=None):
         if prev_window is not None:

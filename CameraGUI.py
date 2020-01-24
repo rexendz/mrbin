@@ -80,8 +80,8 @@ class CameraImage(QObject):
                 self.changePixmap.emit(p)
                 self.change = True
                 if self.phase == 1:
-                    if self.recog.counter >= 20:
-                        detected = self.recog.getObjectClass()
+                    if self.recog.counter >= 10:
+                        detected = self.recog.getAveObjectClass()
                         self.recog.rest()
                         if detected == 'Bottle':
                             self.phase = 2
@@ -90,20 +90,21 @@ class CameraImage(QObject):
                             self.stop()
 
                 elif self.phase == 2:
-                    if self.proc.counter >= 20:
+                    if self.proc.counter >= 10:
                         aveVol = self.proc.getAveVol()
                         height = self.proc.getHeight()
                         diameter = self.proc.getDiameter()
-                        if diameter >= height:
+                        aspectRatio = height/diameter
+                        if (diameter >= height) or (aspectRatio < 3.2):
                             self.notBottle.emit()
                         else:
                             self.gotVolume.emit(aveVol, height, diameter)
-                        if self.reader is not None:
-                            self.reader.write('S')
+                            if self.reader is not None:
+                                self.reader.write('S')
+                            
                         self.stop()
 
         if self.reader is not None:
-            self.reader.write('X')
             self.reader.pause()
         self.cam.release()
         self.finished.emit()
@@ -192,7 +193,8 @@ class Cam(QDialog):
             self.pic.setPixmap(QPixmap(self.userpath + '/mrbin/res/instruction.png'))
 
     def NotABottle(self):
-        QMessageBox.information(self, "Result", "<FONT COLOR='#FFFFFF'>Object is NOT a bottle, please try again</FONT>")
+        QMessageBox.information(self, "Result", "<FONT COLOR='#FFFFFF'>Object is NOT a bottle or INCORRECTLY placed\nPlease try again</FONT>")
+        self.reader.write('X')
         self.worker.stop()
         self.switch_back.emit(self)
 
@@ -217,6 +219,7 @@ class Cam(QDialog):
         self.vbox.addWidget(btn1)
 
     def btn1Action(self):
+        self.reader.write('X')
         self.worker.stop()
         self.switch_back.emit(self)
 
