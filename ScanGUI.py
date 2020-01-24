@@ -72,7 +72,7 @@ class Worker(QObject):
 
 class Scan(QDialog):
     stop_signal = pyqtSignal()
-    switch_cam = pyqtSignal(int, str, int)
+    switch_cam = pyqtSignal(QDialog, int, str, int)
     switch_back = pyqtSignal(QDialog)
     switch_register = pyqtSignal(str)
 
@@ -118,7 +118,7 @@ class Scan(QDialog):
 
     def authenticated(self, userID, name, pts):
         self.stop_signal.emit()
-        self.switch_cam.emit(userID, name, pts)
+        self.switch_cam.emit(self, userID, name, pts)
 
     def register(self, uid):
         ret = QMessageBox.question(self,

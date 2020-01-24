@@ -9,14 +9,16 @@ from AdminGUI import InsertRecords
 
 class Result(QDialog):
     switch_back = pyqtSignal(QDialog)
+    switch_again = pyqtSignal(QDialog, int, str, int)
 
-    def __init__(self, userID, name, pts, vol, height, diameter, sql):
+    def __init__(self, userID, name, pts, vol, height, diameter, sql, reader):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
         self.width = 480
         self.height = 320
+        self.reader = reader
         self.userpath = os.getenv("HOME")
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
@@ -38,11 +40,11 @@ class Result(QDialog):
         self.show()
 
     def CalculateIncentives(self):
-        if self.bottleV < 450:
+        if self.bottleV < 600:
             self.genInc = 1
-        elif 450 <= self.bottleV <= 950:
+        elif 600 <= self.bottleV < 1000:
             self.genInc = 2
-        elif 950 <= self.bottleV <= 1450:
+        elif self.bottleV >= 1000:
             self.genInc = 3
         self.newInc = self.curInc + self.genInc
 
@@ -89,11 +91,14 @@ class Result(QDialog):
         lbl8.setAlignment(Qt.AlignHCenter)
         lbl8.setStyleSheet("font : 20px; font-family : Sanserif; color : white;")
 
-        btn1 = QPushButton("Close", self)
+        btn1 = QPushButton("Deposit Again")
+        btn2 = QPushButton("Close", self)
 
         btn1.setStyleSheet("background-color : #810000; color : white; font : 20px; font-family : Sanserif;")
+        btn2.setStyleSheet("background-color : #810000; color : white; font : 20px; font-family : Sanserif;")
 
         btn1.clicked.connect(self.btn1Action)
+        btn2.clicked.connect(self.btn2Action)
 
         self.vbox.addWidget(lbl1)
         self.vbox.addLayout(self.gbox)
@@ -104,9 +109,14 @@ class Result(QDialog):
         self.gbox.addWidget(lbl6, 1, 1)
         self.gbox.addWidget(lbl7, 2, 1)
         self.vbox.addWidget(lbl8)
-        self.vbox.addWidget(btn1)
+        self.gbox.addWidget(btn1, 3, 0)
+        self.gbox.addWidget(btn2, 3, 1)
 
     def btn1Action(self):
+        self.switch_again.emit(self, self.userID, self.name, self.newInc)
+
+    def btn2Action(self):
+        self.reader.write('X')
         self.switch_back.emit(self)
 
 
