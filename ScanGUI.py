@@ -15,9 +15,12 @@ class Register(InsertRecords):
         self.uid = uid
         self.txt2.setText(self.uid)
         self.txt3.setText('0')
+        self.txt4.setText('0')
         self.txt2.setDisabled(True)
-        self.lbl4.hide()
         self.txt3.hide()
+        self.txt4.hide()
+        self.lbl4.hide()
+        self.lbl5.hide()
 
         self.txt2.setStyleSheet("background-color: #212121; font : 20px; font-family : Sanserif; color : gray;")
 
@@ -27,11 +30,11 @@ class Worker(QObject):
     auth = pyqtSignal(int, str, int)
     register = pyqtSignal(str, SQLServer)
 
-    def __init__(self, reader, parent=None):
+    def __init__(self, reader, sql, parent=None):
         QObject.__init__(self, parent=parent)
         self.userAuthenticated = False
         self.continue_run = True
-        self.sql = SQLServer()
+        self.sql = sql
         self.reader = reader
         self.userID = None
         self.name = None
@@ -48,7 +51,7 @@ class Worker(QObject):
             try:
                 user = self.sql.findUid(int(uid, 16))
                 if len(user) > 0:
-                    (userID, name, rfid, pts), = user
+                    (userID, name, rfid, pts, bottle), = user
                     self.userID = userID
                     self.name = name
                     self.pts = pts
@@ -76,13 +79,14 @@ class Scan(QDialog):
     switch_back = pyqtSignal(QDialog)
     switch_register = pyqtSignal(str)
 
-    def __init__(self, reader):
+    def __init__(self, reader, sql):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
         self.top = 0
         self.width = 480
         self.height = 320
+        self.sql = sql
         self.userpath = os.getenv("HOME")
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
@@ -99,7 +103,7 @@ class Scan(QDialog):
 
     def InitWorker(self):
         self.thread = QThread(parent=self)
-        self.worker = Worker(self.reader)
+        self.worker = Worker(self.reader, self.sql)
 
         self.stop_signal.connect(self.worker.stop)
         self.worker.moveToThread(self.thread)
@@ -172,3 +176,9 @@ class Scan(QDialog):
         self.reader.pause()
         self.stop_signal.emit()
         self.switch_back.emit(self)
+
+if __name__ == "__main__":
+    sql = SQLServer()
+    app = QApplication([])
+    window = Register(sql, '87654321')
+    app.exec()

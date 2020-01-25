@@ -7,11 +7,6 @@ from scipy.spatial import distance as dist
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
-try:
-    from picam import camera
-except ImportError or ImportError:
-    print("Failed importing picam.py **THIS IS NORMAL IF RUNNING ON NON-RASPBIAN**")
-
 sys.path.append("..")
 
 
@@ -54,7 +49,6 @@ class ObjectClassifier:
         self.counter = 0
         self.detectedID = []
         self.cam = cam
-
 
     def sessionRun(self):
         image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')

@@ -11,7 +11,7 @@ class Result(QDialog):
     switch_back = pyqtSignal(QDialog)
     switch_again = pyqtSignal(QDialog, int, str, int)
 
-    def __init__(self, userID, name, pts, vol, height, diameter, sql, reader):
+    def __init__(self, userID, vol, height, diameter, sql, reader):
         super().__init__()
         self.title = "MR BIN"
         self.left = 0
@@ -23,15 +23,16 @@ class Result(QDialog):
         self.icon = QIcon(self.userpath + '/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.gbox = QGridLayout()
+        self.sql = sql
+        user = self.sql.findID(userID)
+        if len(user) > 0:
+            (self.userID, self.name, self.rfid, self.curInc, self.curBottle), = user
         self.bottleH = height
         self.bottleD = diameter
         self.bottleV = vol
-        self.userID = userID
-        self.name = name
-        self.sql = sql
         self.genInc = 0
-        self.curInc = pts
         self.newInc = 0
+        self.newBottle = 0
         self.CalculateIncentives()
         self.InitWindow()
         self.InitComponents()
@@ -47,9 +48,10 @@ class Result(QDialog):
         elif self.bottleV >= 1000:
             self.genInc = 3
         self.newInc = self.curInc + self.genInc
+        self.newBottle = self.curBottle + 1
 
     def UpdateRecord(self):
-        self.sql.updateIncentives(self.userID, self.newInc)
+        self.sql.updateIncentives(self.userID, self.newInc, self.newBottle)
 
     def InitWindow(self):
         self.setWindowTitle(self.title)
@@ -116,13 +118,14 @@ class Result(QDialog):
         self.switch_again.emit(self, self.userID, self.name, self.newInc)
 
     def btn2Action(self):
-        self.reader.write('X')
+        if self.reader is not None:
+            self.reader.write('X')
         self.switch_back.emit(self)
 
 
 if __name__ == "__main__":
     sql = SQLServer()
     app = QApplication([])
-    window = Result(1, "John", 1, 343.12, 17, 15, sql)
+    window = Result(3, 1230, 17, 15, sql, None)
     app.exec()
 
