@@ -180,7 +180,7 @@ class Controller:
 
     def show_scan(self, prev_window):
         prev_window.hide()
-        self.scan = Scan(self.reader)
+        self.scan = Scan(self.reader, self.sql)
         self.scan.switch_back.connect(self.show_window)
         self.scan.switch_cam.connect(self.show_cam)
         self.scan.switch_register.connect(self.show_register)
@@ -207,9 +207,9 @@ class Controller:
         self.cam.switch_back.connect(self.show_window)
         self.cam.switch_result.connect(self.show_result)
 
-    def show_result(self, userID, name, pts, vol, height, diameter):
+    def show_result(self, userID, vol, height, diameter):
         self.cam.hide()
-        self.result = Result(userID, name, pts, vol, height, diameter, self.sql, self.reader)
+        self.result = Result(userID, vol, height, diameter, self.sql, self.reader)
         self.result.switch_back.connect(self.show_window)
         self.result.switch_again.connect(self.show_cam)
 

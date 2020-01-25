@@ -14,10 +14,10 @@ class SQLServer:
     def getLength(self):
         return len(self.readAll())
 
-    def insert(self, name, uid, pts, table="Users"):
+    def insert(self, name, uid, pts, bottle, table="Users"):
         self.query = """
-        INSERT INTO {} (Name, RFID_UID, Incentives) VALUES ('{}', {}, {})
-        """.format(table, name, uid, pts)
+        INSERT INTO {} (Name, RFID_UID, Incentives, Bottle_Deposited) VALUES ('{}', {}, {}, {})
+        """.format(table, name, uid, pts, bottle)
         self.execute()
         self.commit()
 
@@ -75,8 +75,15 @@ class SQLServer:
         self.execute()
         return self.curr.fetchall()
 
-    def modifyRecordByID(self, id, name, rfid, pts, table="Users"):
-        self.query = "UPDATE {} SET Name = '{}', RFID_UID = {}, Incentives = {} WHERE id = {};".format(table, name, rfid, pts, id)
+    def findID(self, id, table="Users"):
+        self.query = """
+        SELECT * FROM {} WHERE id = {}
+        """.format(table, id)
+        self.execute()
+        return self.curr.fetchall()
+
+    def modifyRecordByID(self, id, name, rfid, pts, bottles, table="Users"):
+        self.query = "UPDATE {} SET Name = '{}', RFID_UID = {}, Incentives = {}, Bottle_Deposited = {} WHERE id = {};".format(table, name, rfid, pts, bottles, id)
         self.execute()
         self.commit()
 
@@ -85,8 +92,10 @@ class SQLServer:
         self.execute()
         self.commit()
 
-    def updateIncentives(self, id, pts, table="Users"):
+    def updateIncentives(self, id, pts, bottle, table="Users"):
         self.query = "UPDATE {} SET Incentives = {} WHERE id = {};".format(table, pts, id)
+        self.execute()
+        self.query = "UPDATE {} SET Bottle_Deposited = {} WHERE id = {};".format(table, bottle, id)
         self.execute()
         self.commit()
         print("Updated")
