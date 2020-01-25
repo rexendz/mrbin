@@ -73,21 +73,21 @@ class Result(QDialog):
         lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : #e1efe6")
         lbl1.setAlignment(Qt.AlignHCenter)
 
-        lbl2 = QLabel("Bottle Height: {:.2f}".format(self.bottleH))
-        lbl3 = QLabel("Bottle Diameter: {:.2f}".format(self.bottleD))
-        lbl4 = QLabel("Bottle Volume: {:.2f}".format(self.bottleV))
+        lbl2 = QLabel("Height: {:.2f}cm".format(self.bottleH))
+        lbl3 = QLabel("Diameter: {:.2f}cm".format(self.bottleD))
+        lbl4 = QLabel("Volume: {:.2f}mL".format(self.bottleV))
 
-        lbl2.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
-        lbl3.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
-        lbl4.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
+        lbl2.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
+        lbl3.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
+        lbl4.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
 
-        lbl5 = QLabel("Current Incentive Points: {}".format(self.curInc))
-        lbl6 = QLabel("Incurred Incentive Points: {}".format(self.genInc))
-        lbl7 = QLabel("New Incentive Points: {}".format(self.newInc))
+        lbl5 = QLabel("Current Points: {}".format(self.curInc))
+        lbl6 = QLabel("Incurred Points: {}".format(self.genInc))
+        lbl7 = QLabel("New Points: {}".format(self.newInc))
 
-        lbl6.setStyleSheet("font: 10px; font-family : Sanserif; background-color: white; color : black")
-        lbl7.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
-        lbl5.setStyleSheet("font: 10px; font-family : Sanserif; background-color: black; color : white")
+        lbl6.setStyleSheet("font: 20px; font-family : Sanserif; background-color: white; color : black")
+        lbl7.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
+        lbl5.setStyleSheet("font: 20px; font-family : Sanserif; background-color: black; color : white")
 
         lbl8 = QLabel("Thank you, {}!".format(self.name))
         lbl8.setAlignment(Qt.AlignHCenter)
@@ -96,7 +96,7 @@ class Result(QDialog):
         btn1 = QPushButton("Deposit Again")
         btn2 = QPushButton("Close", self)
 
-        btn1.setStyleSheet("background-color : #810000; color : white; font : 20px; font-family : Sanserif;")
+        btn1.setStyleSheet("background-color : #008100; color : white; font : 20px; font-family : Sanserif;")
         btn2.setStyleSheet("background-color : #810000; color : white; font : 20px; font-family : Sanserif;")
 
         btn1.clicked.connect(self.btn1Action)
@@ -110,9 +110,9 @@ class Result(QDialog):
         self.gbox.addWidget(lbl5, 0, 1)
         self.gbox.addWidget(lbl6, 1, 1)
         self.gbox.addWidget(lbl7, 2, 1)
-        self.vbox.addWidget(lbl8)
         self.gbox.addWidget(btn1, 3, 0)
         self.gbox.addWidget(btn2, 3, 1)
+        self.vbox.addWidget(lbl8)
 
     def btn1Action(self):
         self.switch_again.emit(self, self.userID, self.name, self.newInc)
@@ -126,6 +126,6 @@ class Result(QDialog):
 if __name__ == "__main__":
     sql = SQLServer()
     app = QApplication([])
-    window = Result(3, 1230, 17, 15, sql, None)
+    window = Result(1, 1230, 17, 15, sql, None)
     app.exec()
 

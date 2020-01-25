@@ -63,9 +63,6 @@ class CameraImage(QObject):
                     self.change = False
 
             elif self.objectDetected:
-                if not self.change:
-                    QThread.sleep(1)
-
                 if self.phase == 1:
                     self.recog.classes = None
                     detect, frame = self.recog.getProcessedImage()
