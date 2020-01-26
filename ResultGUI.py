@@ -27,9 +27,9 @@ class Result(QDialog):
         user = self.sql.findID(userID)
         if len(user) > 0:
             (self.userID, self.name, self.rfid, self.curInc, self.curBottle), = user
-        self.bottleH = height
-        self.bottleD = diameter
-        self.bottleV = vol
+        self.bottleH = float(height)
+        self.bottleD = float(diameter)
+        self.bottleV = float(vol)
         self.genInc = 0
         self.newInc = 0
         self.newBottle = 0
