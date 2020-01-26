@@ -92,7 +92,7 @@ class CameraImage(QObject):
                         height = self.proc.getHeight()
                         diameter = self.proc.getDiameter()
                         aspectRatio = height/diameter
-                        if (diameter >= height) or (aspectRatio < 3.2):
+                        if (diameter >= height) or (aspectRatio < 3.0):
                             self.notBottle.emit()
                         else:
                             self.gotVolume.emit(aveVol, height, diameter)
@@ -112,7 +112,7 @@ class CameraImage(QObject):
 
 class Cam(QDialog):
     switch_back = pyqtSignal(QDialog)
-    switch_result = pyqtSignal(int, str, int, float, float, float)
+    switch_result = pyqtSignal(int, float, float, float)
 
     def __init__(self, device, url, image, userID, name, pts, reader, tensor):
         super().__init__()
@@ -181,7 +181,7 @@ class Cam(QDialog):
         msg = QMessageBox()
         msg.setStyleSheet('color : white; font-family : Sanserif; background-color: black; font: 30px;')
         msg.information(self, "Measurement Success", "<FONT COLOR='#FFFFFF'>Average Measured Volume: {:.2f}mL</FONT>".format(vol))
-        self.switch_result.emit(self.userID, self.name, self.pts, vol, height, diameter)
+        self.switch_result.emit(self.userID, vol, height, diameter)
 
     def setImage(self, image=None):
         if image is not None:

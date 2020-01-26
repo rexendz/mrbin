@@ -20,6 +20,7 @@ class ViewRecords(QDialog):
         self.icon = QIcon('/home/rexendz/mrbin/res/favicon.png')
         self.vbox = QVBoxLayout()
         self.sql = sql
+        self.result = None
         self.lbl1 = None
         self.lbl2 = None
         self.table = None
@@ -45,10 +46,10 @@ class ViewRecords(QDialog):
 
     def InitComponents(self):
 
-        result = self.sql.readAll()
+        self.result = self.sql.readAll()
 
         self.table = QTableWidget(self)
-        self.table.setRowCount(len(result))
+        self.table.setRowCount(len(self.result))
         self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels(['ID', 'Name', 'RFID-UID', 'Incentives', 'Bottles Deposited'])
         self.table.verticalHeader().setVisible(False)
@@ -56,14 +57,14 @@ class ViewRecords(QDialog):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.totalBottles = 0
 
-        for i in range(len(result)):
+        for i in range(len(self.result)):
             for j in range(5):
                 if j == 2:
-                    self.table.setItem(i, j, QTableWidgetItem("{:08X}".format(result[i][j])))
+                    self.table.setItem(i, j, QTableWidgetItem("{:08X}".format(self.result[i][j])))
                 else:
-                    self.table.setItem(i, j, QTableWidgetItem(str(result[i][j])))
+                    self.table.setItem(i, j, QTableWidgetItem(str(self.result[i][j])))
                 if j == 4:
-                    self.totalBottles += int(result[i][j])
+                    self.totalBottles += int(self.result[i][j])
 
         self.lbl1 = QLabel("MR BIN Users", self)
         self.lbl1.setStyleSheet("font : 40px; font-family : Sanserif; color : white")
@@ -201,11 +202,11 @@ class InsertRecords(QDialog):
         else:
             try:
                 self.sql.insert(str(self.txt1.text()), int(self.txt2.text(), 16), int(self.txt3.text()), int(self.txt4.text()))
-                msg.information(self, "Success!",
-                                "<FONT COLOR='#FFFFFF'>Data Inserted\nName: {}\nRFID_UID: {}\nIncentives: {}</FONT>".format(self.txt1.text(),
-                                                                                               self.txt2.text(),
-                                                                                               self.txt3.text(),
-                                                                                               self.txt4.text()))
+                msg.information(self, "Success!", """
+                                <FONT COLOR='#FFFFFF'>Data Inserted\n
+                                Name: {}\n
+                                RFID_UID: {}\n
+                                Incentives: {}</FONT>""".format(self.txt1.text(), self.txt2.text(), self.txt3.text(), self.txt4.text()))
             except OperationalError:
                 msg.warning(self, "Failed!", "Data Insertion Failed!\nNo Record Inserted")
         self.switch_back.emit(self)
